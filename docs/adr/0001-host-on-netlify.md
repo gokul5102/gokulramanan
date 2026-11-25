@@ -1,0 +1,7 @@
+# Host on Netlify's free plan, at gokulramanan.netlify.app
+
+Hosting must be free and there is no custom domain for now, so the host's subdomain is the site's permanent address, and changing hosts later would break every link already shared. Vercel's free Hobby plan has the bigger limits (100 GB transfer and 100 deploys a day) but forbids commercial use, including "advertising the sale of a product or service", which the site's freelance mention would breach; its plain-name subdomain is also taken. Netlify's free plan allows commercial projects and includes Netlify Forms at no credit cost, so the contact form needs no other service. The cost is a hard cap of 300 credits a month (15 per production deploy, 20 per GB of bandwidth, Deploy Previews and branch deploys free), after which Netlify takes the site offline until the next cycle. So pages stay light, and production deploys happen only for approved changes.
+
+Cloudflare (free, uncapped, commercial use allowed) was the earlier choice with a custom domain. Without a domain, its Worker email sending is unavailable, and the brief limits hosting to Vercel or Netlify.
+
+Terms checked 2026-11-15: [Vercel fair use](https://vercel.com/docs/limits/fair-use-guidelines), [Vercel limits](https://vercel.com/docs/limits), [Netlify credits](https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/how-credits-work/), [Netlify free plan](https://www.netlify.com/blog/introducing-netlify-free-plan/), [Netlify Forms notifications](https://docs.netlify.com/manage/forms/notifications/).
