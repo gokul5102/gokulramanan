@@ -1,0 +1,829 @@
+<meta charset="utf-8">
+<title>Gokul Ramanan Homepage Mockups</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<!--
+  PROTOTYPE — throwaway. Three homepage variants on one page, switched with #a / #b / #c,
+  the floating bar at the bottom, or the ← → keys.
+  A: Front page (broadsheet)   B: Margin notes (broadsheet + notebook diagrams)   C: Term sheet
+  Not production code: no tests, links are inert, the form is not wired.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Barlow+Condensed:wght@500;600&family=IBM+Plex+Mono:wght@400;500&family=Kalam:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&family=Newsreader:ital,opsz,wght@0,6..72,400..800;1,6..72,400..600&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<style>
+/* Layout: one page, three self-contained homepages; each variant owns its palette and type. */
+:root {
+  /* A — Front page: cool newsprint, black ink, one forest-green spot colour */
+  --a-paper: #e8e9e4; --a-ink: #141513; --a-muted: #565952; --a-rule: #141513; --a-accent: #1d5a3b; --a-tint: #dcdeD7;
+  /* B — Margin notes: graph paper, graphite, blue ballpoint, yellow highlighter */
+  --b-paper: #f6f7f5; --b-grid: #e2e7e6; --b-ink: #22272b; --b-muted: #5d656b; --b-pen: #2346c4; --b-mark: #ffe46b; --b-wash: #eef1fb;
+  /* C — Term sheet: white document, navy ink, one bid-blue */
+  --c-paper: #fbfbfa; --c-ink: #0f1b2d; --c-muted: #586374; --c-rule: #cdd3db; --c-accent: #0a58cc; --c-band: #eef1f5;
+  /* prototype switcher (not part of any design) */
+  --sw-bg: #121212; --sw-fg: #fafafa;
+
+  --f-news: 'Newsreader', Georgia, 'Times New Roman', serif;
+  --f-cond: 'Barlow Condensed', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --f-book: 'Literata', Georgia, 'Times New Roman', serif;
+  --f-hand: 'Kalam', 'Comic Sans MS', 'Marker Felt', cursive;
+  --f-sans: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --a-paper: #131412; --a-ink: #e7e6df; --a-muted: #a3a49b; --a-rule: #e7e6df; --a-accent: #7cc49c; --a-tint: #1c1d1a;
+    --b-paper: #15181b; --b-grid: #20262a; --b-ink: #e1e5e7; --b-muted: #99a2a8; --b-pen: #8eb0ff; --b-mark: #6a5b10; --b-wash: #1b2232;
+    --c-paper: #0c121d; --c-ink: #e5eaf1; --c-muted: #98a4b5; --c-rule: #263246; --c-accent: #6ca6ff; --c-band: #121a29;
+    --sw-bg: #f2f2f2; --sw-fg: #111111;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --a-paper: #131412; --a-ink: #e7e6df; --a-muted: #a3a49b; --a-rule: #e7e6df; --a-accent: #7cc49c; --a-tint: #1c1d1a;
+  --b-paper: #15181b; --b-grid: #20262a; --b-ink: #e1e5e7; --b-muted: #99a2a8; --b-pen: #8eb0ff; --b-mark: #6a5b10; --b-wash: #1b2232;
+  --c-paper: #0c121d; --c-ink: #e5eaf1; --c-muted: #98a4b5; --c-rule: #263246; --c-accent: #6ca6ff; --c-band: #121a29;
+  --sw-bg: #f2f2f2; --sw-fg: #111111;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--a-paper); color: var(--a-ink); }
+body[data-v="b"] { background: var(--b-paper); color: var(--b-ink); }
+body[data-v="c"] { background: var(--c-paper); color: var(--c-ink); }
+h1, h2, h3, h4, p, dl, dd, figure, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.wrap {
+  width: 100%; max-width: 1200px; margin-inline: auto;
+  padding-left: max(clamp(16px, 4vw, 40px), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(16px, 4vw, 40px), env(safe-area-inset-right, 0px));
+}
+.email { user-select: all; overflow-wrap: anywhere; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* ───────────────────────── A · FRONT PAGE ───────────────────────── */
+.va { font-family: var(--f-news); color: var(--a-ink); background: var(--a-paper); }
+.va a { text-decoration: none; }
+.va-top {
+  display: flex; justify-content: space-between; align-items: center; gap: .75rem 1.5rem; flex-wrap: wrap;
+  padding-block: .8rem; font: 500 .9rem/1.2 var(--f-cond); text-transform: uppercase; letter-spacing: .08em; color: var(--a-muted);
+}
+.va-nav { display: flex; align-items: center; gap: .4rem 1.25rem; flex-wrap: wrap; }
+.va-nav a { color: var(--a-ink); }
+.va-nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.va-cta { border: 1.5px solid var(--a-ink); padding: .3rem .65rem; }
+.va-nav a.va-cta:hover { background: var(--a-ink); color: var(--a-paper); text-decoration: none; }
+.va-masthead {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 1.5rem;
+  padding-block: 1.1rem .8rem; border-top: 3px solid var(--a-rule);
+}
+.va-nameplate {
+  font-size: clamp(2.5rem, 8vw, 7.25rem); font-weight: 800; line-height: .92; letter-spacing: -.035em;
+  font-variation-settings: 'opsz' 72; white-space: nowrap; text-align: center;
+}
+.va-ear {
+  font: 500 .82rem/1.35 var(--f-cond); text-transform: uppercase; letter-spacing: .08em;
+  border: 1px solid var(--a-rule); padding: .5rem .65rem; max-width: 13rem;
+}
+.va-ear-l { justify-self: start; }
+.va-ear-r { justify-self: end; text-align: right; }
+.va-folio {
+  display: flex; justify-content: space-between; gap: .5rem 1.5rem; flex-wrap: wrap;
+  padding-block: .4rem; border-top: 1px solid var(--a-rule); border-bottom: 4px double var(--a-rule);
+  font: 500 .85rem/1.2 var(--f-cond); text-transform: uppercase; letter-spacing: .08em;
+}
+.va-ticker { overflow: hidden; border-bottom: 1px solid var(--a-rule); background: var(--a-tint); }
+.va-tape { display: flex; width: max-content; animation: tape 70s linear infinite; }
+.va-tape-set { display: flex; gap: 2.75rem; padding: .6rem 2.75rem .6rem 0; font: 400 .82rem/1 var(--f-mono); white-space: nowrap; }
+.va-tape-set:first-child { padding-left: max(16px, env(safe-area-inset-left, 0px)); }
+.va-tape b { font-weight: 500; color: var(--a-muted); text-transform: uppercase; letter-spacing: .04em; margin-right: .5rem; }
+.va-tape i { font-style: normal; color: var(--a-accent); }
+@keyframes tape { to { transform: translateX(-50%); } }
+.va-front {
+  display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr);
+  padding-block: 2rem 2.25rem; border-bottom: 1px solid var(--a-rule);
+}
+.va-lead { padding-right: 2.5rem; }
+.va-kicker { font: 600 .92rem/1 var(--f-cond); text-transform: uppercase; letter-spacing: .1em; color: var(--a-accent); margin-bottom: .7rem; }
+.va-headline {
+  font-size: clamp(2rem, 4.5vw, 3.55rem); line-height: 1.03; font-weight: 700; letter-spacing: -.02em;
+  font-variation-settings: 'opsz' 72; text-wrap: balance;
+}
+.va-standfirst { margin-top: 1.1rem; font-size: 1.24rem; line-height: 1.5; max-width: 36em; font-variation-settings: 'opsz' 16; }
+.va-paths { display: flex; margin-top: 1.75rem; border-block: 1px solid var(--a-rule); }
+.va-path { flex: 1 1 0; display: flex; flex-direction: column; gap: .25rem; padding: .9rem 1rem .95rem 0; color: var(--a-ink); }
+.va-path + .va-path { border-left: 1px solid var(--a-rule); padding-left: 1rem; }
+.va-path small { font: 500 .85rem/1 var(--f-cond); text-transform: uppercase; letter-spacing: .08em; color: var(--a-muted); }
+.va-path span { font-size: 1.35rem; font-weight: 600; }
+.va-path span::after { content: ' →'; color: var(--a-accent); }
+.va-path:hover span { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.va-box { border-left: 1px solid var(--a-rule); padding-left: 2rem; }
+.va-box h3, .va-section {
+  font: 600 .95rem/1 var(--f-cond); text-transform: uppercase; letter-spacing: .12em;
+  border-top: 3px solid var(--a-rule); padding-top: .55rem; margin-bottom: 1.1rem;
+}
+.va-box dl { display: grid; }
+.va-box dl > div { display: grid; grid-template-columns: 6.6rem minmax(0, 1fr); gap: .9rem; align-items: baseline; padding-block: .7rem; border-bottom: 1px dotted var(--a-rule); }
+.va-box dt { font-size: 1.9rem; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; font-variation-settings: 'opsz' 48; }
+.va-box dd { font-size: .98rem; line-height: 1.4; }
+.va-stories { padding-block: 2rem 2.25rem; border-bottom: 1px solid var(--a-rule); }
+.va-story-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.va-story { display: flex; flex-direction: column; gap: .7rem; padding-inline: 1.5rem; border-left: 1px solid var(--a-rule); }
+.va-story:first-child { padding-left: 0; border-left: 0; }
+.va-story:last-child { padding-right: 0; }
+.va-story .va-kicker { margin-bottom: 0; }
+.va-story h4 { font-size: 1.8rem; line-height: 1.06; font-weight: 700; letter-spacing: -.015em; text-wrap: balance; font-variation-settings: 'opsz' 48; }
+.va-story p { font-size: 1.03rem; line-height: 1.55; }
+.va-stat { font: 400 .84rem/1.5 var(--f-mono); color: var(--a-accent); border-top: 1px dotted var(--a-rule); padding-top: .55rem; }
+.va-more { margin-top: auto; font: 600 .9rem/1 var(--f-cond); text-transform: uppercase; letter-spacing: .08em; color: var(--a-ink); }
+.va-more:hover { color: var(--a-accent); }
+.va-lower { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) minmax(0, 1fr); gap: 2.5rem; padding-block: 2rem 2.5rem; }
+.va-notes li + li, .va-also li + li { border-top: 1px dotted var(--a-rule); }
+.va-notes li { padding-block: .8rem; display: grid; gap: .3rem; }
+.va-notes .meta { font: 400 .78rem/1 var(--f-mono); color: var(--a-muted); }
+.va-notes h4 { font-size: 1.32rem; line-height: 1.2; font-weight: 650; text-wrap: balance; }
+.va-notes p { font-size: .98rem; line-height: 1.5; color: var(--a-muted); }
+.va-also li { padding-block: .6rem; font-size: .98rem; line-height: 1.45; }
+.va-also b { font-weight: 650; }
+.va-about p { font-size: 1.02rem; line-height: 1.6; }
+.va-about p::first-letter { float: left; font-size: 3.5em; line-height: .78; font-weight: 800; padding: .06em .08em 0 0; }
+.va-foot { border-top: 4px double var(--a-rule); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 2rem 3rem; padding-block: 2rem 7rem; }
+.va-foot h2 { font-size: clamp(1.7rem, 3.4vw, 2.5rem); line-height: 1.08; font-weight: 700; letter-spacing: -.02em; text-wrap: balance; }
+.va-foot .email { display: inline-block; margin-top: .8rem; font: 500 1.05rem/1.3 var(--f-mono); color: var(--a-accent); }
+.va-foot-links { display: flex; flex-wrap: wrap; gap: .4rem 1.25rem; margin-top: 1rem; font: 600 .95rem/1 var(--f-cond); text-transform: uppercase; letter-spacing: .08em; }
+.va-foot-links a:hover { text-decoration: underline; }
+.va-foot-side { display: grid; gap: .8rem; align-content: start; font-size: 1rem; line-height: 1.5; }
+.va-foot-side small { font: 400 .78rem/1.5 var(--f-mono); color: var(--a-muted); }
+
+@media (max-width: 860px) {
+  .va-masthead { grid-template-columns: minmax(0, 1fr); }
+  .va-ear { display: none; }
+  .va-front { grid-template-columns: minmax(0, 1fr); }
+  .va-lead { padding-right: 0; }
+  .va-box { border-left: 0; padding-left: 0; margin-top: 2rem; }
+  .va-story-grid { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .va-story, .va-story:first-child, .va-story:last-child { padding: 0; border-left: 0; }
+  .va-story + .va-story { border-top: 1px solid var(--a-rule); padding-top: 1.5rem; }
+  .va-lower, .va-foot { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .va-paths { flex-direction: column; }
+  .va-path + .va-path { border-left: 0; padding-left: 0; border-top: 1px solid var(--a-rule); }
+  .va-folio span:nth-child(2) { display: none; }
+}
+
+/* ───────────────────────── B · MARGIN NOTES ───────────────────────── */
+.vb {
+  font-family: var(--f-book); color: var(--b-ink); background-color: var(--b-paper);
+  background-image: linear-gradient(var(--b-grid) 1px, transparent 1px), linear-gradient(90deg, var(--b-grid) 1px, transparent 1px);
+  background-size: 26px 26px; background-position: -1px -1px;
+}
+.vb a { text-decoration: none; }
+.vb-head { display: flex; justify-content: space-between; align-items: center; gap: .75rem 1.5rem; flex-wrap: wrap; padding-block: 1.4rem; }
+.vb-name { font: 700 1.65rem/1 var(--f-hand); color: var(--b-ink); }
+.vb-nav { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem 1.3rem; font-size: 1rem; }
+.vb-nav a:hover { color: var(--b-pen); }
+.vb-cta, .vb-path {
+  border: 1.6px solid currentColor;
+  border-radius: 255px 14px 225px 14px / 14px 225px 14px 255px;
+}
+.vb-cta { padding: .35rem .9rem; color: var(--b-pen); }
+.vb-section { padding-block: 2.25rem; }
+.vb-row { display: grid; grid-template-columns: minmax(0, 40rem) minmax(0, 15rem); column-gap: clamp(1.5rem, 5vw, 4.5rem); align-items: start; }
+.vb-row + .vb-row { margin-top: 1.75rem; }
+.vb-note { font: 400 1.08rem/1.38 var(--f-hand); color: var(--b-pen); padding-top: .25rem; }
+.vb-note strong { font-weight: 700; font-size: 1.5rem; display: block; line-height: 1.1; }
+.vb-note svg { display: block; width: 130px; height: 64px; color: var(--b-pen); margin-top: .35rem; }
+.vb-eyebrow { font: 400 .8rem/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--b-muted); margin-bottom: 1rem; }
+.vb h1 { font-size: clamp(1.95rem, 4.3vw, 3.15rem); line-height: 1.14; font-weight: 600; letter-spacing: -.012em; text-wrap: balance; }
+.vb mark {
+  color: inherit; padding-inline: .1em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background: linear-gradient(176deg, transparent 52%, var(--b-mark) 52%, var(--b-mark) 90%, transparent 90%);
+}
+.vb-intro { margin-top: 1.25rem; font-size: 1.16rem; line-height: 1.66; }
+.vb-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; margin-top: 1.75rem; }
+.vb-path { display: grid; gap: .3rem; padding: .85rem 1.05rem; color: var(--b-ink); }
+.vb-path:hover { background: var(--b-wash); color: var(--b-pen); }
+.vb-path small { font: 400 .76rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--b-muted); }
+.vb-path span { font-size: 1.18rem; font-weight: 600; }
+.vb h2 { font-size: 1.85rem; line-height: 1.15; font-weight: 600; text-wrap: balance; }
+.vb-sub { font: 400 .8rem/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--b-muted); margin-top: .45rem; }
+.vb-fig { margin-block: 1.4rem 1.2rem; }
+.vb-fig svg { display: block; width: 100%; height: auto; max-width: 100%; color: var(--b-ink); }
+.vb-fig svg .pen { color: var(--b-pen); }
+.vb-fig figcaption { margin-top: .6rem; font-size: .95rem; font-style: italic; color: var(--b-muted); }
+.vb-body p { font-size: 1.08rem; line-height: 1.7; }
+.vb-body p + p { margin-top: .9rem; }
+.vb-entry h3 { font-size: 1.4rem; line-height: 1.2; font-weight: 600; }
+.vb-entry p { margin-top: .45rem; font-size: 1.06rem; line-height: 1.65; }
+.vb-link { display: inline-block; margin-top: .6rem; color: var(--b-pen); font-weight: 600; border-bottom: 1.5px solid currentColor; }
+.vb-list li { display: grid; gap: .25rem; }
+.vb-list li + li { margin-top: 1rem; }
+.vb-list b { font-weight: 600; }
+.vb-foot { border-top: 1.6px dashed var(--b-ink); padding-block: 2rem 7rem; margin-top: 1rem; }
+.vb-foot h2 { font-size: clamp(1.6rem, 3.3vw, 2.3rem); }
+.vb-foot .email { display: inline-block; margin-top: .7rem; font: 500 1.05rem/1.3 var(--f-mono); color: var(--b-pen); }
+.vb-foot-links { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; margin-top: 1rem; font-weight: 600; }
+.vb-foot-links a:hover { color: var(--b-pen); }
+.vb-foot small { display: block; margin-top: 1.2rem; font: 400 .78rem/1.6 var(--f-mono); color: var(--b-muted); }
+
+@media (max-width: 900px) {
+  .vb-row { grid-template-columns: minmax(0, 1fr); }
+  .vb-note { margin-top: .9rem; padding-left: .9rem; border-left: 2px solid var(--b-pen); }
+  .vb-note svg { display: none; }
+}
+@media (max-width: 520px) { .vb-paths { grid-template-columns: minmax(0, 1fr); } }
+
+/* ───────────────────────── C · TERM SHEET ───────────────────────── */
+.vc { font-family: var(--f-sans); color: var(--c-ink); background: var(--c-paper); }
+.vc a { text-decoration: none; }
+.vc-head { display: flex; justify-content: space-between; align-items: center; gap: .75rem 1.5rem; flex-wrap: wrap; padding-block: 1rem; border-bottom: 1px solid var(--c-rule); }
+.vc-name { font-weight: 720; font-variation-settings: 'wdth' 78; text-transform: uppercase; letter-spacing: .05em; font-size: 1.02rem; }
+.vc-nav { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem 1.4rem; font-size: .97rem; }
+.vc-nav a:hover { color: var(--c-accent); }
+.vc-cta { background: var(--c-accent); color: var(--c-paper); padding: .45rem .85rem; border-radius: 2px; font-weight: 600; }
+.vc-nav a.vc-cta:hover { color: var(--c-paper); filter: brightness(1.08); }
+.vc-hero { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 4.5rem); padding-block: clamp(2rem, 5vw, 3.75rem); border-bottom: 1px solid var(--c-rule); }
+.vc-doc { font: 500 .78rem/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--c-muted); }
+.vc-title { margin-top: .85rem; font-size: clamp(2.6rem, 6.4vw, 5.2rem); line-height: .95; font-weight: 760; font-variation-settings: 'wdth' 68; letter-spacing: -.005em; text-wrap: balance; }
+.vc-lede { margin-top: 1.3rem; font-size: 1.15rem; line-height: 1.6; max-width: 36em; }
+.vc-paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; margin-top: 2rem; }
+.vc-path { display: grid; gap: .35rem; padding: 1rem 1.1rem; border: 1px solid var(--c-ink); color: var(--c-ink); }
+.vc-path:hover { background: var(--c-band); }
+.vc-path small { font: 500 .72rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--c-muted); }
+.vc-path span { font-size: 1.15rem; font-weight: 650; }
+.vc-path span::after { content: ' →'; color: var(--c-accent); }
+.vc-terms { width: 100%; border-collapse: collapse; font-size: .98rem; }
+.vc-terms caption { text-align: left; padding-bottom: .6rem; border-bottom: 2px solid var(--c-ink); font: 500 .78rem/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; }
+.vc-terms th { width: 38%; text-align: left; vertical-align: top; font: 500 .74rem/1.5 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--c-muted); padding: .72rem .75rem .72rem 0; border-bottom: 1px solid var(--c-rule); }
+.vc-terms td { padding: .66rem 0; border-bottom: 1px solid var(--c-rule); line-height: 1.45; overflow-wrap: anywhere; }
+.vc-terms .live { font-variant-numeric: tabular-nums; }
+.vc-sect { padding-block: 2.5rem; }
+.vc-h2 { display: flex; align-items: baseline; gap: .9rem; flex-wrap: wrap; font-size: 1.65rem; font-weight: 680; font-variation-settings: 'wdth' 82; margin-bottom: 1.2rem; }
+.vc-h2 span { font: 500 .78rem/1 var(--f-mono); text-transform: uppercase; letter-spacing: .08em; color: var(--c-accent); }
+.vc-sched { width: 100%; border-collapse: collapse; }
+.vc-sched th { text-align: left; font: 500 .72rem/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--c-muted); padding: 0 1rem .6rem 0; border-bottom: 2px solid var(--c-ink); }
+.vc-sched td { vertical-align: top; padding: 1.05rem 1.25rem 1.1rem 0; border-bottom: 1px solid var(--c-rule); }
+.vc-sched tr:hover td { background: var(--c-band); }
+.vc-ref, .vc-period { font: 400 .85rem/1.5 var(--f-mono); color: var(--c-muted); white-space: nowrap; }
+.vc-work b { display: block; font-size: 1.18rem; font-weight: 680; line-height: 1.2; }
+.vc-work small { display: block; margin-top: .3rem; font: 400 .74rem/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--c-muted); }
+.vc-did { font-size: 1rem; line-height: 1.55; max-width: 34em; }
+.vc-res { font: 500 .95rem/1.55 var(--f-mono); color: var(--c-accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.vc-also { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 2.5rem; margin-top: 1.5rem; }
+.vc-also li { display: grid; grid-template-columns: 3.2rem minmax(0, 1fr); gap: .5rem; padding-block: .7rem; border-bottom: 1px solid var(--c-rule); font-size: .98rem; line-height: 1.45; }
+.vc-also li > span:first-child { font: 400 .85rem/1.6 var(--f-mono); color: var(--c-muted); }
+.vc-three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(2rem, 4vw, 3.5rem); padding-block: 2.5rem; border-top: 1px solid var(--c-rule); }
+.vc-three .vc-h2 { font-size: 1.35rem; margin-bottom: 1rem; }
+.vc-defs > div { padding-block: .65rem; border-bottom: 1px solid var(--c-rule); }
+.vc-defs dt { font: 500 .9rem/1.3 var(--f-mono); color: var(--c-accent); }
+.vc-defs dd { margin-top: .2rem; font-size: .97rem; line-height: 1.5; }
+.vc-intro { font-size: .95rem; line-height: 1.5; color: var(--c-muted); margin-bottom: .4rem; }
+.vc-notes li { display: grid; gap: .3rem; padding-block: .75rem; border-bottom: 1px solid var(--c-rule); }
+.vc-notes .meta { font: 400 .75rem/1 var(--f-mono); color: var(--c-muted); }
+.vc-notes b { font-size: 1.1rem; font-weight: 650; line-height: 1.3; }
+.vc-notes p { font-size: .96rem; line-height: 1.5; color: var(--c-muted); }
+.vc-about p { font-size: 1rem; line-height: 1.6; }
+.vc-about p + p { margin-top: .8rem; }
+.vc-foot { background: var(--c-band); border-top: 1px solid var(--c-rule); }
+.vc-foot-inner { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 2rem 3rem; padding-block: 2.25rem 7rem; }
+.vc-foot h2 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 1; font-weight: 740; font-variation-settings: 'wdth' 70; text-wrap: balance; }
+.vc-foot .email { display: inline-block; margin-top: .8rem; font: 500 1.05rem/1.3 var(--f-mono); color: var(--c-accent); }
+.vc-foot-links { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; margin-top: 1rem; font-weight: 600; }
+.vc-foot-links a:hover { color: var(--c-accent); }
+.vc-foot-side { display: grid; gap: .8rem; align-content: start; font-size: 1rem; line-height: 1.5; }
+.vc-foot-side small { font: 400 .76rem/1.6 var(--f-mono); color: var(--c-muted); }
+
+@media (max-width: 900px) {
+  .vc-hero, .vc-foot-inner { grid-template-columns: minmax(0, 1fr); }
+  .vc-three { grid-template-columns: minmax(0, 1fr); }
+  .vc-also { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .vc-sched thead { display: none; }
+  .vc-sched, .vc-sched tbody, .vc-sched tr, .vc-sched td { display: block; width: 100%; }
+  .vc-sched tr { padding-block: 1rem; border-bottom: 1px solid var(--c-rule); }
+  .vc-sched td { border: 0; padding: .2rem 0; }
+  .vc-sched tr:hover td { background: none; }
+  .vc-res { white-space: normal; margin-top: .4rem; }
+}
+@media (max-width: 520px) { .vc-paths { grid-template-columns: minmax(0, 1fr); } }
+
+/* ───────────────────────── PROTOTYPE SWITCHER ───────────────────────── */
+.proto-bar {
+  position: fixed; left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 50;
+  display: flex; align-items: center; gap: .2rem; padding: .3rem;
+  background: var(--sw-bg); color: var(--sw-fg); border-radius: 999px; box-shadow: 0 8px 28px rgba(0, 0, 0, .28);
+  font: 500 .85rem/1 system-ui, -apple-system, 'Segoe UI', sans-serif; max-width: calc(100vw - 24px);
+}
+.proto-bar button {
+  appearance: none; border: 0; background: transparent; color: inherit; font: inherit; font-size: 1.05rem;
+  width: 2.2rem; height: 2.2rem; border-radius: 999px; cursor: pointer; display: grid; place-items: center;
+}
+.proto-bar button:hover { background: color-mix(in srgb, var(--sw-fg) 16%, transparent); }
+.proto-bar button:focus-visible { outline: 2px solid var(--sw-fg); outline-offset: 1px; }
+#proto-label { padding-inline: .5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#proto-label em { font-style: normal; opacity: .62; font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; margin-right: .45rem; }
+
+@media (prefers-reduced-motion: reduce) { .va-tape { animation: none; } }
+</style>
+
+<!-- ═══════════════════════════ A · FRONT PAGE ═══════════════════════════ -->
+<div class="va" data-variant="a">
+  <div class="wrap va-top">
+    <span><span data-date>Sunday 15 November 2026</span> · Mumbai</span>
+    <nav class="va-nav" aria-label="Main">
+      <a href="#" data-proto>Work</a><a href="#" data-proto>Notes</a><a href="#" data-proto>About</a><a href="#" data-proto>Résumé</a>
+      <a href="#" data-proto class="va-cta">Get in touch</a>
+    </nav>
+  </div>
+  <header class="wrap">
+    <div class="va-masthead">
+      <p class="va-ear va-ear-l">Real-time systems<br>for bond trading</p>
+      <h1 class="va-nameplate">Gokul Ramanan</h1>
+      <p class="va-ear va-ear-r">Mumbai<br><span data-clock class="num">—</span> IST</p>
+    </div>
+    <div class="va-folio">
+      <span>Software Engineer II · JPMorgan Chase</span>
+      <span>Mumbai edition · Since 2023</span>
+      <span>Price: one email</span>
+    </div>
+  </header>
+  <div class="va-ticker" aria-label="Results from recent work">
+    <div class="va-tape">
+      <div class="va-tape-set">
+        <span><b>Alert latency</b><i>▼ 33%</i></span>
+        <span><b>Concurrent alerts</b>2,000 <i>▲ 4×</i></span>
+        <span><b>Trade-data latency</b><i>▼ 75%</i></span>
+        <span><b>Volume handled</b><i>▲ 10×</i></span>
+        <span><b>Alert subscriptions</b>2,172 → 45</span>
+        <span><b>Infra cost after K8s</b><i>▼ 75%</i></span>
+        <span><b>Grid updates</b>4–5 / sec</span>
+        <span><b>Messaging uptime</b>99.8%</span>
+        <span><b>Rollout incidents</b>0</span>
+      </div>
+      <div class="va-tape-set" aria-hidden="true">
+        <span><b>Alert latency</b><i>▼ 33%</i></span>
+        <span><b>Concurrent alerts</b>2,000 <i>▲ 4×</i></span>
+        <span><b>Trade-data latency</b><i>▼ 75%</i></span>
+        <span><b>Volume handled</b><i>▲ 10×</i></span>
+        <span><b>Alert subscriptions</b>2,172 → 45</span>
+        <span><b>Infra cost after K8s</b><i>▼ 75%</i></span>
+        <span><b>Grid updates</b>4–5 / sec</span>
+        <span><b>Messaging uptime</b>99.8%</span>
+        <span><b>Rollout incidents</b>0</span>
+      </div>
+    </div>
+  </div>
+  <main class="wrap">
+    <section class="va-front">
+      <article class="va-lead">
+        <p class="va-kicker">Profile</p>
+        <h2 class="va-headline">Bond traders watch my software all day. My job is to make sure it keeps up.</h2>
+        <p class="va-standfirst">I'm a software engineer at JPMorgan Chase in Mumbai. I build the live grids that stream bond prices to traders, the alerts that tell them when an auction they care about goes live, and the infrastructure underneath. These days I build a lot of it with AI agents.</p>
+        <div class="va-paths">
+          <a href="#" data-proto class="va-path"><small>Hiring?</small><span>Read the résumé</span></a>
+          <a href="#" data-proto class="va-path"><small>Have a project?</small><span>Tell me about it</span></a>
+        </div>
+      </article>
+      <aside class="va-box">
+        <h3>By the numbers</h3>
+        <dl>
+          <div><dt>−33%</dt><dd>time for a bond-auction alert to reach a trader</dd></div>
+          <div><dt>10×</dt><dd>trade volume handled, at 75% lower latency</dd></div>
+          <div><dt>98%</dt><dd>fewer alert subscriptions after a cleanup (2,172 → 45)</dd></div>
+          <div><dt>0</dt><dd>incidents moving a trading platform to Kubernetes</dd></div>
+        </dl>
+      </aside>
+    </section>
+    <section class="va-stories">
+      <h3 class="va-section">Selected work</h3>
+      <div class="va-story-grid">
+        <article class="va-story">
+          <p class="va-kicker">Alerting · 2026</p>
+          <h4>Alerts that fire on time</h4>
+          <p>Traders set alerts on bond auctions. I led the server side of a new alerts engine, built from scratch: one leader node checks every alert, with its nested AND/OR filters, against the live auction stream.</p>
+          <p class="va-stat">33% faster · 2,000 alerts at once (4×)</p>
+          <a href="#" data-proto class="va-more">Read the case study →</a>
+        </article>
+        <article class="va-story">
+          <p class="va-kicker">Streaming · 2023–26</p>
+          <h4>A grid that keeps up</h4>
+          <p>Traders watch quotes and trades change several times a second. I redesigned the platform that streams them and swapped a 200&nbsp;KB snapshot for small batched updates.</p>
+          <p class="va-stat">75% lower latency · 10× volume · zero downtime</p>
+          <a href="#" data-proto class="va-more">Read the case study →</a>
+        </article>
+        <article class="va-story">
+          <p class="va-kicker">Reliability · 2026</p>
+          <h4>2,172 → 45</h4>
+          <p>Alerts had stopped arriving. I traced it to thousands of dormant and duplicate subscriptions, then ended a daily feed outage caused by memory exhaustion and silent WebSocket reconnects.</p>
+          <p class="va-stat">98% fewer subscriptions · K8s move: 75% cheaper</p>
+          <a href="#" data-proto class="va-more">Read the case study →</a>
+        </article>
+      </div>
+    </section>
+    <section class="va-lower">
+      <div class="va-notes">
+        <h3 class="va-section">Notes</h3>
+        <ul>
+          <li><span class="meta">Nov 2026 · 6 min</span><h4>What 2,172 alert subscriptions taught me about cleanup</h4><p>Nobody owns the delete path. How stale subscriptions piled up, and the small job that keeps them gone.</p></li>
+          <li><span class="meta">Nov 2026 · 8 min</span><h4>Streaming a grid five times a second without freezing the browser</h4><p>Batching, snapshots, and the one column that kept lagging.</p></li>
+        </ul>
+      </div>
+      <div class="va-also">
+        <h3 class="va-section">Also built</h3>
+        <ul>
+          <li><b>Fuel Route Planner.</b> A Django API that plans the cheapest fuel stops on a US road trip.</li>
+          <li><b>Super Saviours.</b> Real-time emergency-response app. Won UHack 2022, University of Quebec.</li>
+          <li><b>Kerberos for 10 services.</b> Replaced X.509 certificates and their manual renewals.</li>
+          <li><b>Security scans in 30+ repos.</b> Added to Jenkins pipelines.</li>
+        </ul>
+      </div>
+      <div class="va-about">
+        <h3 class="va-section">About the author</h3>
+        <p>I live in Mumbai. I joined JPMorgan Chase as an intern in 2023, after a B.Tech in IT from Sardar Patel Institute of Technology. Outside work it's football and the gym. I also run a monthly session on AI tooling for 50+ colleagues.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap"><div class="va-foot">
+    <div>
+      <h2>Write to me. I reply within a day.</h2>
+      <span class="email">gokulr5102@gmail.com</span>
+      <div class="va-foot-links">
+        <a href="https://www.linkedin.com/in/gokul-ramanan1" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://github.com/gokul5102" target="_blank" rel="noopener">GitHub</a>
+        <a href="#" data-proto>Résumé (PDF)</a>
+      </div>
+    </div>
+    <div class="va-foot-side">
+      <p>It's <span data-clock class="num">—</span> in Mumbai.</p>
+      <p>I also take on a few freelance projects a year.</p>
+      <small>Set in Newsreader and Barlow Condensed. Built by hand with Astro, hosted on Netlify. © 2026 Gokul Ramanan.</small>
+    </div>
+  </div></footer>
+</div>
+
+<!-- ═══════════════════════════ B · MARGIN NOTES ═══════════════════════════ -->
+<div class="vb" data-variant="b" hidden>
+  <header class="wrap vb-head">
+    <a href="#" data-proto class="vb-name">Gokul Ramanan</a>
+    <nav class="vb-nav" aria-label="Main">
+      <a href="#" data-proto>Work</a><a href="#" data-proto>Notes</a><a href="#" data-proto>About</a><a href="#" data-proto>Résumé</a>
+      <a href="#" data-proto class="vb-cta">Get in touch</a>
+    </nav>
+  </header>
+  <main class="wrap">
+    <section class="vb-section">
+      <div class="vb-row">
+        <div>
+          <p class="vb-eyebrow">Software Engineer II · JPMorgan Chase · Mumbai</p>
+          <h1>I build real-time systems for bond trading. The part I care about most is <mark>keeping them up</mark>.</h1>
+        </div>
+        <aside class="vb-note">
+          <strong>2,172 → 45</strong>
+          alert subscriptions left after one cleanup. The story is below.
+          <svg data-rough="arrow" viewBox="0 0 130 64" aria-hidden="true"></svg>
+        </aside>
+      </div>
+      <div class="vb-row">
+        <div>
+          <p class="vb-intro">I work on the software behind bond auctions and trading at JPMorgan Chase: live grids that stream prices to traders, alerts that fire when an auction they care about goes live, and the infrastructure under both. These days I build a lot of it with AI agents.</p>
+          <div class="vb-paths">
+            <a href="#" data-proto class="vb-path"><small>If you're hiring</small><span>Read my résumé →</span></a>
+            <a href="#" data-proto class="vb-path"><small>If you have a project</small><span>Tell me about it →</span></a>
+          </div>
+        </div>
+        <aside class="vb-note">Since 2023. Before that: a hackathon win in Quebec and a lot of LeetCode.</aside>
+      </div>
+    </section>
+
+    <section class="vb-section">
+      <div class="vb-row">
+        <div>
+          <h2>How an alert reaches a trader</h2>
+          <p class="vb-sub">Case study · Bond auction alerts · 2026</p>
+          <figure class="vb-fig">
+            <svg data-rough="diagram" viewBox="0 0 680 300" role="img" aria-label="Sketch: a live auction feed goes to a rule engine leader, with a standby engine ready to take over; the leader sends alerts to the trader's screen."></svg>
+            <figcaption>Sketch of the alerts engine. One leader checks every alert against the live auction stream.</figcaption>
+          </figure>
+          <div class="vb-body">
+            <p>Traders set alerts on bond auctions: tell me when a bond like this comes up, at a size like that. The old service checked them in bulk and fell behind when the market got busy.</p>
+            <p>I led the server side of the replacement. Each alert is checked on its own against the live stream, its filters can nest AND and OR as deep as the trader likes, and a standby engine takes over if the leader goes down.</p>
+          </div>
+          <a href="#" data-proto class="vb-link">Read the full case study</a>
+        </div>
+        <aside class="vb-note">
+          <strong>−33%</strong> time for an alert to reach a trader
+          <br><br>
+          <strong>2,000</strong> alerts running at once, 4× the old limit
+          <br><br>
+          Built with AI agents doing a lot of the typing.
+        </aside>
+      </div>
+    </section>
+
+    <section class="vb-section">
+      <div class="vb-row">
+        <div class="vb-entry">
+          <h3>A grid that keeps up</h3>
+          <p>Traders watch quotes and trades change several times a second. I redesigned the platform that streams them and swapped a 200&nbsp;KB snapshot for small batched updates.</p>
+          <a href="#" data-proto class="vb-link">Read it</a>
+        </div>
+        <aside class="vb-note"><strong>−75%</strong> latency, at 10× the volume. Zero downtime at rollout.</aside>
+      </div>
+      <div class="vb-row">
+        <div class="vb-entry">
+          <h3>2,172 → 45</h3>
+          <p>Alerts had stopped arriving. I traced it to thousands of dormant and duplicate subscriptions, then ended a daily feed outage caused by memory exhaustion and silent WebSocket reconnects.</p>
+          <a href="#" data-proto class="vb-link">Read it</a>
+        </div>
+        <aside class="vb-note"><strong>98%</strong> fewer subscriptions. Then moved the platform to Kubernetes: 75% cheaper, no incidents.</aside>
+      </div>
+    </section>
+
+    <section class="vb-section">
+      <div class="vb-row">
+        <div>
+          <h2>Notes</h2>
+          <ul class="vb-list" style="margin-top:1rem">
+            <li><b>What 2,172 alert subscriptions taught me about cleanup</b><span>Nobody owns the delete path. How stale subscriptions piled up, and the small job that keeps them gone.</span></li>
+            <li><b>Streaming a grid five times a second without freezing the browser</b><span>Batching, snapshots, and the one column that kept lagging.</span></li>
+          </ul>
+        </div>
+        <aside class="vb-note">Nov 2026. Two so far. Roughly one a month from here.</aside>
+      </div>
+      <div class="vb-row">
+        <div>
+          <h2>Also built</h2>
+          <ul class="vb-list" style="margin-top:1rem">
+            <li><b>Fuel Route Planner</b><span>A Django API that plans the cheapest fuel stops on a US road trip.</span></li>
+            <li><b>Super Saviours</b><span>Real-time emergency-response app. Won UHack 2022, University of Quebec.</span></li>
+            <li><b>Kerberos for 10 services, security scans in 30+ repos</b><span>The unglamorous security work that removes manual steps.</span></li>
+          </ul>
+        </div>
+        <aside class="vb-note">Mumbai. Football and the gym when I'm not at a keyboard.</aside>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap"><div class="vb-foot">
+    <h2>Write to me. I reply within a day.</h2>
+    <span class="email">gokulr5102@gmail.com</span>
+    <div class="vb-foot-links">
+      <a href="https://www.linkedin.com/in/gokul-ramanan1" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/gokul5102" target="_blank" rel="noopener">GitHub</a>
+      <a href="#" data-proto>Résumé (PDF)</a>
+      <span>It's <span data-clock class="num">—</span> in Mumbai.</span>
+    </div>
+    <small>I also take on a few freelance projects a year. · Set in Literata and Kalam. Built by hand with Astro, hosted on Netlify. © 2026 Gokul Ramanan.</small>
+  </div></footer>
+</div>
+
+<!-- ═══════════════════════════ C · TERM SHEET ═══════════════════════════ -->
+<div class="vc" data-variant="c" hidden>
+  <header class="wrap"><div class="vc-head">
+    <a href="#" data-proto class="vc-name">Gokul Ramanan</a>
+    <nav class="vc-nav" aria-label="Main">
+      <a href="#" data-proto>Work</a><a href="#" data-proto>Notes</a><a href="#" data-proto>About</a><a href="#" data-proto>Résumé</a>
+      <a href="#" data-proto class="vc-cta">Get in touch</a>
+    </nav>
+  </div></header>
+  <main class="wrap">
+    <section class="vc-hero">
+      <div>
+        <p class="vc-doc">Summary of terms · Revised <span data-date-short>15 Nov 2026</span></p>
+        <h1 class="vc-title">Real-time systems for bond trading.</h1>
+        <p class="vc-lede">I'm a software engineer at JPMorgan Chase in Mumbai. I build the live grids that stream bond prices to traders, the alerts that tell them when an auction they care about goes live, and the infrastructure underneath. These days I build a lot of it with AI agents.</p>
+        <div class="vc-paths">
+          <a href="#" data-proto class="vc-path"><small>For hiring</small><span>Read the résumé</span></a>
+          <a href="#" data-proto class="vc-path"><small>For projects</small><span>Tell me about it</span></a>
+        </div>
+      </div>
+      <table class="vc-terms">
+        <caption>Key terms</caption>
+        <tbody>
+          <tr><th scope="row">Name</th><td>Gokul Ramanan</td></tr>
+          <tr><th scope="row">Role</th><td>Software Engineer II</td></tr>
+          <tr><th scope="row">Employer</th><td>JPMorgan Chase &amp; Co.</td></tr>
+          <tr><th scope="row">Desk</th><td>Bond trading systems</td></tr>
+          <tr><th scope="row">Based in</th><td>Mumbai, India</td></tr>
+          <tr><th scope="row">Local time</th><td class="live"><span data-clock>—</span> IST (UTC+05:30)</td></tr>
+          <tr><th scope="row">Since</th><td>2023</td></tr>
+          <tr><th scope="row">Main stack</th><td>Java, Spring Boot, React, Kubernetes, AMPS</td></tr>
+          <tr><th scope="row">Contact</th><td><span class="email">gokulr5102@gmail.com</span></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="vc-sect">
+      <h2 class="vc-h2"><span>Schedule A</span>Selected work</h2>
+      <table class="vc-sched">
+        <thead><tr><th>Ref.</th><th>Work</th><th>What I did</th><th>Result</th><th>Period</th></tr></thead>
+        <tbody>
+          <tr>
+            <td class="vc-ref">A-1</td>
+            <td class="vc-work"><b>Alerts that fire on time</b><small>Bond auction alerts</small></td>
+            <td class="vc-did">Led the server side of a new alerts engine, built from scratch. One leader node checks every alert, with nested AND/OR filters, against the live auction stream. A standby takes over if it fails.</td>
+            <td class="vc-res">−33% latency<br>2,000 at once (4×)</td>
+            <td class="vc-period">2026</td>
+          </tr>
+          <tr>
+            <td class="vc-ref">A-2</td>
+            <td class="vc-work"><b>A grid that keeps up</b><small>Live quotes and trades</small></td>
+            <td class="vc-did">Redesigned the platform that streams bond quotes and trades to traders' screens, and replaced a 200&nbsp;KB snapshot with small batched updates.</td>
+            <td class="vc-res">−75% latency<br>10× volume<br>0 downtime</td>
+            <td class="vc-period">2023–26</td>
+          </tr>
+          <tr>
+            <td class="vc-ref">A-3</td>
+            <td class="vc-work"><b>2,172 → 45</b><small>Production reliability</small></td>
+            <td class="vc-did">Traced missing alerts to thousands of dormant and duplicate subscriptions. Ended a daily feed outage caused by memory exhaustion and silent WebSocket reconnects. Moved the platform to Kubernetes.</td>
+            <td class="vc-res">−98% subscriptions<br>−75% infra cost<br>0 incidents</td>
+            <td class="vc-period">2026</td>
+          </tr>
+        </tbody>
+      </table>
+      <ul class="vc-also">
+        <li><span>A-4</span><span><b>Fuel Route Planner.</b> A Django API that plans the cheapest fuel stops on a US road trip.</span></li>
+        <li><span>A-5</span><span><b>Super Saviours.</b> Emergency-response app. Won UHack 2022, University of Quebec.</span></li>
+        <li><span>A-6</span><span><b>Kerberos for 10 services.</b> Replaced X.509 certificates and their manual renewals.</span></li>
+        <li><span>A-7</span><span><b>Security scans in 30+ repos.</b> Added to Jenkins pipelines.</span></li>
+      </ul>
+    </section>
+
+    <section class="vc-three">
+      <div>
+        <h2 class="vc-h2"><span>§ 1</span>Definitions</h2>
+        <p class="vc-intro">Terms from the work above, for readers outside finance.</p>
+        <dl class="vc-defs">
+          <div><dt>BWIC</dt><dd>Bid Wanted In Competition. A seller lists bonds and dealers bid on them in a short auction.</dd></div>
+          <div><dt>RFQ</dt><dd>Request for quote. A client asks dealers for a price on a bond.</dd></div>
+          <div><dt>TBA</dt><dd>To Be Announced. A forward trade in mortgage bonds where the exact pools are named just before settlement.</dd></div>
+          <div><dt>AMPS</dt><dd>A high-speed messaging engine that streams market data between services.</dd></div>
+        </dl>
+      </div>
+      <div>
+        <h2 class="vc-h2"><span>§ 2</span>Notes</h2>
+        <ul class="vc-notes">
+          <li><span class="meta">Nov 2026 · 6 min</span><b>What 2,172 alert subscriptions taught me about cleanup</b><p>Nobody owns the delete path.</p></li>
+          <li><span class="meta">Nov 2026 · 8 min</span><b>Streaming a grid five times a second without freezing the browser</b><p>Batching, snapshots, and the one column that kept lagging.</p></li>
+        </ul>
+      </div>
+      <div class="vc-about">
+        <h2 class="vc-h2"><span>§ 3</span>About</h2>
+        <p>I live in Mumbai. I joined JPMorgan Chase as an intern in 2023, after a B.Tech in IT from Sardar Patel Institute of Technology.</p>
+        <p>Outside work it's football and the gym. I also run a monthly session on AI tooling for 50+ colleagues.</p>
+      </div>
+    </section>
+  </main>
+  <footer class="vc-foot">
+    <div class="wrap vc-foot-inner">
+      <div>
+        <h2>Write to me. I reply within a day.</h2>
+        <span class="email">gokulr5102@gmail.com</span>
+        <div class="vc-foot-links">
+          <a href="https://www.linkedin.com/in/gokul-ramanan1" target="_blank" rel="noopener">LinkedIn</a>
+          <a href="https://github.com/gokul5102" target="_blank" rel="noopener">GitHub</a>
+          <a href="#" data-proto>Résumé (PDF)</a>
+        </div>
+      </div>
+      <div class="vc-foot-side">
+        <p>It's <span data-clock class="num">—</span> in Mumbai.</p>
+        <p>I also take on a few freelance projects a year.</p>
+        <small>Set in Archivo and IBM Plex Mono. Built by hand with Astro, hosted on Netlify. © 2026 Gokul Ramanan.</small>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════ PROTOTYPE SWITCHER ═══════════════════════════ -->
+<div class="proto-bar" role="toolbar" aria-label="Switch mockup">
+  <button type="button" id="proto-prev" aria-label="Previous mockup">←</button>
+  <span id="proto-label" aria-live="polite"><em>Prototype</em>A · Front page</span>
+  <button type="button" id="proto-next" aria-label="Next mockup">→</button>
+</div>
+
+<script>
+(function () {
+  var VARIANTS = [
+    { key: 'a', name: 'Front page' },
+    { key: 'b', name: 'Margin notes' },
+    { key: 'c', name: 'Term sheet' }
+  ];
+  var current = 'a';
+  var label = document.getElementById('proto-label');
+
+  function keyFromHash() {
+    var k = (location.hash || '').slice(1).toLowerCase();
+    return VARIANTS.some(function (v) { return v.key === k; }) ? k : null;
+  }
+
+  function show(key) {
+    current = key;
+    document.querySelectorAll('[data-variant]').forEach(function (el) { el.hidden = el.dataset.variant !== key; });
+    document.body.dataset.v = key;
+    var i = VARIANTS.findIndex(function (v) { return v.key === key; });
+    label.innerHTML = '<em>Prototype</em>' + key.toUpperCase() + ' of 3 · ' + VARIANTS[i].name;
+    if (key === 'b') drawRough();
+  }
+
+  function step(delta) {
+    var i = VARIANTS.findIndex(function (v) { return v.key === current; });
+    var next = VARIANTS[(i + delta + VARIANTS.length) % VARIANTS.length].key;
+    location.hash = next;
+    window.scrollTo(0, 0);
+  }
+
+  document.getElementById('proto-prev').addEventListener('click', function () { step(-1); });
+  document.getElementById('proto-next').addEventListener('click', function () { step(1); });
+  window.addEventListener('hashchange', function () { var k = keyFromHash(); if (k) show(k); });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target;
+    if (t && (t.closest('input, textarea, select, [contenteditable=""], [contenteditable="true"]'))) return;
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[data-proto]');
+    if (a) e.preventDefault();
+  });
+
+  /* Mumbai clock */
+  var timeFmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true });
+  var dateFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  var shortFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', day: 'numeric', month: 'short', year: 'numeric' });
+  function tick() {
+    var now = new Date();
+    document.querySelectorAll('[data-clock]').forEach(function (el) { el.textContent = timeFmt.format(now); });
+    document.querySelectorAll('[data-date]').forEach(function (el) { el.textContent = dateFmt.format(now).replace(',', ''); });
+    document.querySelectorAll('[data-date-short]').forEach(function (el) { el.textContent = shortFmt.format(now); });
+  }
+  tick();
+  setInterval(tick, 20000);
+
+  /* Hand-drawn diagram (variant B) */
+  var drawn = false;
+  function drawRough() {
+    if (drawn) return;
+    drawn = true;
+    var NS = 'http://www.w3.org/2000/svg';
+    var hasRough = typeof window.rough !== 'undefined';
+    function opts(extra) {
+      var o = { stroke: 'currentColor', strokeWidth: 1.6, roughness: 1.3, bowing: 1, seed: 7 };
+      for (var k in extra) o[k] = extra[k];
+      return o;
+    }
+    function node(tag, attrs, text) {
+      var el = document.createElementNS(NS, tag);
+      for (var k in attrs) el.setAttribute(k, attrs[k]);
+      if (text) el.textContent = text;
+      return el;
+    }
+    function label(parent, x, y, text, size, anchor) {
+      parent.appendChild(node('text', { x: x, y: y, 'font-family': "Kalam, 'Comic Sans MS', cursive", 'font-size': size || 17, 'text-anchor': anchor || 'middle', fill: 'currentColor' }, text));
+    }
+    function box(parent, rc, x, y, w, h, extra) {
+      if (rc) parent.appendChild(rc.rectangle(x, y, w, h, opts(extra || {})));
+      else parent.appendChild(node('rect', { x: x, y: y, width: w, height: h, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6, 'stroke-dasharray': extra && extra.strokeLineDash ? extra.strokeLineDash.join(' ') : '' }));
+    }
+    function line(parent, rc, x1, y1, x2, y2, extra) {
+      if (rc) parent.appendChild(rc.line(x1, y1, x2, y2, opts(extra || {})));
+      else parent.appendChild(node('line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: 'currentColor', 'stroke-width': 1.6 }));
+    }
+    function arrow(parent, rc, x1, y1, x2, y2, extra) {
+      line(parent, rc, x1, y1, x2, y2, extra);
+      var a = Math.atan2(y2 - y1, x2 - x1), L = 13, s = 0.45;
+      line(parent, rc, x2, y2, x2 - L * Math.cos(a - s), y2 - L * Math.sin(a - s), { strokeLineDash: undefined });
+      line(parent, rc, x2, y2, x2 - L * Math.cos(a + s), y2 - L * Math.sin(a + s), { strokeLineDash: undefined });
+    }
+
+    var d = document.querySelector('svg[data-rough="diagram"]');
+    if (d) {
+      var rc = hasRough ? rough.svg(d) : null;
+      var ink = node('g', {}), pen = node('g', { class: 'pen' });
+      d.appendChild(ink); d.appendChild(pen);
+      box(ink, rc, 12, 118, 150, 66);                  label(ink, 87, 147, 'Live auction feed'); label(ink, 87, 169, 'via AMPS', 13);
+      box(ink, rc, 255, 34, 180, 82);                  label(ink, 345, 66, 'Rule engine (leader)'); label(ink, 345, 92, 'nested AND / OR filters', 13);
+      box(ink, rc, 255, 204, 180, 64, { strokeLineDash: [7, 6] }); label(ink, 345, 242, 'Standby engine');
+      box(ink, rc, 520, 118, 150, 66);                 label(ink, 595, 156, "Trader's screen");
+      arrow(ink, rc, 164, 140, 251, 88);
+      arrow(ink, rc, 164, 164, 251, 226, { strokeLineDash: [6, 6] });
+      arrow(ink, rc, 438, 88, 516, 140);
+      line(ink, rc, 345, 120, 345, 200, { strokeLineDash: [4, 6] });
+      label(pen, 452, 46, '33% faster than before', 15, 'start');
+      label(pen, 448, 258, 'takes over if the leader dies', 15, 'start');
+    }
+
+    var a = document.querySelector('svg[data-rough="arrow"]');
+    if (a && hasRough) {
+      var ra = rough.svg(a);
+      a.appendChild(ra.curve([[124, 6], [92, 18], [58, 38], [18, 52]], opts({ strokeWidth: 1.4, seed: 11 })));
+      a.appendChild(ra.line(18, 52, 31, 43, opts({ strokeWidth: 1.4, seed: 12 })));
+      a.appendChild(ra.line(18, 52, 32, 57, opts({ strokeWidth: 1.4, seed: 13 })));
+    }
+  }
+
+  show(keyFromHash() || 'a');
+})();
+</script>

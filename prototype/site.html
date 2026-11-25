@@ -1,0 +1,1213 @@
+<meta charset="utf-8">
+<title>Portfolio Site Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<!--
+  PROTOTYPE, throwaway. Final check of the whole site against docs/spec.md before building.
+  Round 3 of this file: every sentence is the copy agreed section by section in docs/spec.md, with facts from the résumé or from Gokul.
+  One design (Margin notes, already chosen), every page in the spec, launch copy by default.
+  Pages switch through hash routes (#/work/alerts) and the floating bar at the bottom (← → keys too).
+  The bar's Options panel switches theme, launch/later copy, review marks, clock and form result,
+  and shows the stored ?via= tag. Not production code: the form sends nothing, the PDF link is inert,
+  sketches are drawn in the browser here (the real site draws them at build time).
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Kalam:wght@400;700&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<style>
+:root {
+  --paper: #f6f7f5; --grid: #e2e7e6; --ink: #22272b; --muted: #5d656b; --pen: #2346c4; --mark: #ffe46b; --wash: #eef1fb; --err: #b3261e;
+  --f-book: 'Literata', Georgia, 'Times New Roman', serif;
+  --f-hand: 'Kalam', 'Comic Sans MS', 'Marker Felt', cursive;
+  --f-mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+  --hand-radius: 255px 14px 225px 14px / 14px 225px 14px 255px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #15181b; --grid: #20262a; --ink: #e1e5e7; --muted: #99a2a8; --pen: #8eb0ff; --mark: #6a5b10; --wash: #1b2232; --err: #ff8a80;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #15181b; --grid: #20262a; --ink: #e1e5e7; --muted: #99a2a8; --pen: #8eb0ff; --mark: #6a5b10; --wash: #1b2232; --err: #ff8a80;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body[data-page="contact"] .foot h2 { display: none; }
+body[data-copy="launch"] .later-only, body[data-copy="later"] .launch-only { display: none !important; }
+body {
+  margin: 0; padding-bottom: 88px;
+  background-color: var(--paper); color: var(--ink); font-family: var(--f-book);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 26px 26px; background-position: -1px -1px;
+}
+h1, h2, h3, p, ul, figure, dl, dd { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.wrap {
+  width: 100%; max-width: 1200px; margin-inline: auto;
+  padding-left: max(clamp(16px, 4vw, 40px), env(safe-area-inset-left, 0px));
+  padding-right: max(clamp(16px, 4vw, 40px), env(safe-area-inset-right, 0px));
+}
+.num { font-variant-numeric: tabular-nums; }
+.email { user-select: all; overflow-wrap: anywhere; }
+
+/* Header */
+.head { display: flex; justify-content: space-between; align-items: center; gap: .75rem 1.5rem; flex-wrap: wrap; padding-block: 1.4rem; }
+.name { font: 700 1.65rem/1 var(--f-hand); }
+.nav { display: flex; align-items: center; flex-wrap: wrap; gap: .4rem 1.3rem; font-size: 1rem; }
+.nav a:hover { color: var(--pen); }
+.nav a[aria-current="page"] { color: var(--pen); text-decoration: underline; text-decoration-thickness: 1.6px; text-underline-offset: .35em; }
+.cta, .path { border: 1.6px solid currentColor; border-radius: var(--hand-radius); }
+.cta { padding: .35rem .9rem; color: var(--pen); }
+.cta:hover { background: var(--wash); }
+
+/* Rows: reading column plus margin */
+.section { padding-block: 2.25rem; }
+.row { display: grid; grid-template-columns: minmax(0, 40rem) minmax(0, 15rem); column-gap: clamp(1.5rem, 5vw, 4.5rem); align-items: start; }
+.row + .row { margin-top: 1.9rem; }
+.note { font: 400 1.1rem/1.4 var(--f-hand); color: var(--pen); padding-top: .3rem; }
+.note a { border-bottom: 1.4px solid currentColor; }
+.note svg { display: block; width: 130px; height: 64px; color: var(--pen); margin-top: .35rem; }
+
+.eyebrow { font: 400 .8rem/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-bottom: 1rem; }
+h1 { font-size: clamp(1.95rem, 4.3vw, 3.1rem); line-height: 1.15; font-weight: 600; letter-spacing: -.012em; text-wrap: balance; }
+mark {
+  color: inherit; padding-inline: .1em; -webkit-box-decoration-break: clone; box-decoration-break: clone;
+  background: linear-gradient(176deg, transparent 52%, var(--mark) 52%, var(--mark) 90%, transparent 90%);
+}
+.intro { margin-top: 1.25rem; font-size: 1.16rem; line-height: 1.66; }
+.paths { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem; margin-top: 1.75rem; }
+.path { display: grid; gap: .3rem; padding: .85rem 1.05rem; }
+.path:hover { background: var(--wash); color: var(--pen); }
+.path small { font: 400 .76rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.path span { font-size: 1.18rem; font-weight: 600; }
+
+h2 { font-size: 1.85rem; line-height: 1.15; font-weight: 600; text-wrap: balance; }
+h2 a:hover { color: var(--pen); }
+.sub { font: 400 .8rem/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin-top: .45rem; }
+.fig { margin-block: 1.4rem 1.2rem; }
+.fig svg { display: block; width: 100%; height: auto; max-width: 100%; color: var(--ink); }
+.fig svg .pen { color: var(--pen); }
+.fig figcaption { margin-top: .6rem; font-size: .95rem; font-style: italic; color: var(--muted); }
+.body p { font-size: 1.08rem; line-height: 1.7; }
+.body p + p { margin-top: .9rem; }
+.body h2 { margin-bottom: .9rem; }
+.body h2:not(:first-child) { margin-top: 2rem; }
+.entry h3 { font-size: 1.4rem; line-height: 1.2; font-weight: 600; }
+.entry h3 a:hover { color: var(--pen); }
+.entry .eyebrow { margin-bottom: .5rem; }
+.entry p { margin-top: .45rem; font-size: 1.06rem; line-height: 1.65; }
+.more { display: inline-block; margin-top: .6rem; color: var(--pen); font-weight: 600; border-bottom: 1.5px solid currentColor; }
+.list { margin-top: 1rem; }
+.list li { display: grid; gap: .25rem; font-size: 1.04rem; line-height: 1.55; }
+.list li + li { margin-top: 1rem; }
+.list b { font-weight: 600; }
+.list b a { border-bottom: 1.4px solid currentColor; }
+.list b a:hover { color: var(--pen); }
+.built { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .9rem; margin-top: 1.6rem; padding-top: .9rem; border-top: 1.6px dashed var(--grid); font-size: 1.04rem; line-height: 1.5; }
+.built span { font: 400 .78rem/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+
+/* Notes list */
+.notes li { display: grid; gap: .3rem; padding-block: 1.1rem; }
+.notes li + li { border-top: 1.6px dashed var(--grid); }
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .7rem; font: 400 .78rem/1.4 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.tag { padding: .05rem .5rem; border: 1.4px solid currentColor; border-radius: var(--hand-radius); }
+.notes h3 { font-size: 1.35rem; line-height: 1.25; font-weight: 600; }
+.notes h3 a:hover { color: var(--pen); }
+.notes p { font-size: 1.04rem; line-height: 1.6; }
+
+/* Footer */
+.foot { border-top: 1.6px dashed var(--ink); padding-block: 2rem 3rem; margin-top: 1rem; }
+.foot h2 { font-size: clamp(1.6rem, 3.3vw, 2.3rem); }
+.foot .email { display: inline-block; margin-top: .7rem; font: 500 1.05rem/1.3 var(--f-mono); color: var(--pen); }
+.foot-links { display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; margin-top: 1rem; font-weight: 600; }
+.foot-links a:hover { color: var(--pen); }
+.foot small { display: block; margin-top: 1.2rem; font: 400 .78rem/1.6 var(--f-mono); color: var(--muted); }
+
+/* Inner pages */
+.back { display: inline-block; margin-bottom: 1.6rem; font: 400 .85rem/1.2 var(--f-mono); color: var(--muted); }
+.back:hover { color: var(--pen); }
+.next-link { font-size: 1.5rem; font-weight: 600; color: var(--pen); border-bottom: 1.6px solid currentColor; line-height: 1.5; }
+
+/* Résumé */
+.cv-contact { display: flex; flex-wrap: wrap; gap: .3rem 1.2rem; margin-top: .9rem; font: 400 .9rem/1.5 var(--f-mono); color: var(--muted); }
+.cv-contact a:hover { color: var(--pen); }
+.dl { display: inline-block; margin-top: 1.3rem; font-weight: 600; }
+.cv h2 { font-size: 1.35rem; margin-top: 2.4rem; padding-bottom: .35rem; border-bottom: 1.6px solid var(--ink); }
+.cv h2:first-child { margin-top: 0; }
+.cv h3 { font-size: 1.1rem; font-weight: 600; margin-top: 1.1rem; }
+.role { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .1rem 1rem; margin-top: 1.1rem; font-weight: 600; font-style: italic; }
+.role span { font: 400 .82rem/1.5 var(--f-mono); font-style: normal; color: var(--muted); }
+.bul li { position: relative; padding-left: 1.1rem; margin-top: .5rem; font-size: 1.02rem; line-height: 1.6; }
+.bul li::before { content: "–"; position: absolute; left: 0; color: var(--pen); }
+.skills { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr); gap: .45rem 1rem; margin-top: 1rem; font-size: 1.02rem; line-height: 1.55; }
+.skills dt { font: 400 .78rem/1.9 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+
+/* Contact */
+.form { display: grid; gap: 1.5rem; margin-top: 2rem; max-width: 36rem; }
+.field { display: grid; gap: .45rem; border: 0; padding: 0; margin: 0; min-width: 0; }
+.field > label, .field > legend { font: 400 .78rem/1.2 var(--f-mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: 0; }
+.field > legend { margin-bottom: .45rem; }
+.field input[type="text"], .field input[type="email"] {
+  width: 100%; font: 400 1.12rem/1.5 var(--f-book); color: var(--ink); background: transparent;
+  border: 0; border-bottom: 1.6px solid var(--ink); border-radius: 0; padding: .3rem 0;
+}
+.field textarea {
+  width: 100%; font: 400 1.08rem/1.6 var(--f-book); color: var(--ink); background: var(--paper); resize: vertical;
+  border: 1.6px solid var(--ink); border-radius: var(--hand-radius); padding: .85rem 1rem;
+}
+.field input:focus, .field textarea:focus { outline: none; border-color: var(--pen); box-shadow: 0 1.6px 0 var(--pen); }
+.field textarea:focus { box-shadow: 0 0 0 1px var(--pen); }
+.choices { display: flex; flex-wrap: wrap; gap: .6rem; }
+.choice { position: relative; }
+.choice input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.choice span { display: inline-block; padding: .45rem 1rem; font-size: 1.02rem; border: 1.6px solid var(--ink); border-radius: var(--hand-radius); }
+.choice input:checked + span { background: var(--wash); color: var(--pen); border-color: var(--pen); }
+.choice input:focus-visible + span { outline: 2px solid var(--pen); outline-offset: 2px; }
+.form-error { font: 400 1.1rem/1.4 var(--f-hand); color: var(--err); }
+.form-fail { display: grid; gap: .4rem; padding: .9rem 1.1rem; border: 1.6px solid var(--err); border-radius: var(--hand-radius); }
+.form-fail b { color: var(--err); font-weight: 600; }
+.form-fail .email { font: 500 1rem/1.3 var(--f-mono); color: var(--pen); }
+.send {
+  justify-self: start; font: 600 1.1rem/1 var(--f-book); color: var(--paper); background: var(--ink); cursor: pointer;
+  border: 0; padding: .8rem 1.5rem; border-radius: var(--hand-radius);
+}
+.send:hover { background: var(--pen); }
+.sent { margin-top: 2rem; display: grid; gap: .6rem; max-width: 36rem; }
+.sent p { font-size: 1.1rem; line-height: 1.6; }
+
+/* About */
+.photo-slot {
+  display: grid; place-items: center; aspect-ratio: 4 / 5; max-width: 13rem; padding: 1rem; text-align: center;
+  border: 1.6px dashed var(--pen); border-radius: var(--hand-radius); font: 400 1.05rem/1.35 var(--f-hand); color: var(--pen);
+}
+
+/* Review marks: sentences the résumé doesn't state, for Gokul to confirm. Prototype only. */
+.guess { text-decoration: underline dotted var(--err); text-decoration-thickness: 2px; text-underline-offset: .28em; text-decoration-skip-ink: none; }
+.guess::after { content: "?"; font: 700 .8em/1 var(--f-hand); color: var(--err); margin-left: .12em; vertical-align: super; }
+body[data-marks="off"] .guess { text-decoration: none; }
+body[data-marks="off"] .guess::after { content: none; }
+body[data-marks="off"] .review { display: none !important; }
+.draft { margin-bottom: 1.4rem; padding: .6rem .9rem; border: 1.6px dashed var(--err); border-radius: var(--hand-radius); font: 400 1.02rem/1.4 var(--f-hand); color: var(--err); max-width: 40rem; }
+
+/* Prototype-only notices and controls: deliberately not in the site's style. */
+.proto-note { display: block; padding: .5rem .7rem; border: 1px dashed var(--muted); border-radius: 6px; font: 400 12.5px/1.5 ui-sans-serif, system-ui, -apple-system, sans-serif; color: var(--muted); overflow-wrap: anywhere; }
+.pbar, .ppanel { font: 500 13px/1.3 ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif; color: #fff; background: #111; z-index: 50; box-shadow: 0 8px 28px rgba(0,0,0,.3); }
+.pbar { position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); display: flex; align-items: center; gap: 2px; padding: 5px; border-radius: 999px; max-width: calc(100vw - 20px); }
+.pbar button, .ppanel button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; border-radius: 999px; padding: 7px 11px; }
+.pbar button:hover, .ppanel button:hover { background: #333; }
+.pbar button:focus-visible, .ppanel button:focus-visible, .ppanel input:focus-visible { outline: 2px solid #fff; outline-offset: 1px; }
+.plabel { min-width: 0; padding: 0 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.plabel code { font: 12px ui-monospace, Menlo, monospace; opacity: .65; margin-left: 6px; }
+.popt { border-left: 1px solid #444 !important; border-radius: 0 999px 999px 0 !important; }
+.ppanel { position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); width: min(430px, calc(100vw - 20px)); padding: 14px; border-radius: 14px; display: grid; gap: 10px; }
+.ppanel .prow { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: center; gap: 8px; }
+.ppanel .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.ppanel .seg button { padding: 5px 10px; background: #262626; }
+.ppanel .seg button[aria-pressed="true"] { background: #fff; color: #111; }
+.ppanel input { font: 12.5px ui-monospace, Menlo, monospace; width: 100%; padding: 6px 8px; border-radius: 6px; border: 1px solid #444; background: #1d1d1d; color: #fff; }
+.ppanel .state { font: 12px/1.5 ui-monospace, Menlo, monospace; color: #bbb; border-top: 1px solid #333; padding-top: 8px; overflow-wrap: anywhere; }
+.ppanel .hint { color: #999; font-size: 12px; }
+
+@media (max-width: 900px) {
+  .row { grid-template-columns: minmax(0, 1fr); }
+  .note { margin-top: .9rem; padding-left: .9rem; border-left: 2px solid var(--pen); }
+  .note:empty { display: none; }
+  .note svg { display: none; }
+  .photo-slot { max-width: 9rem; }
+}
+@media (max-width: 520px) {
+  .paths { grid-template-columns: minmax(0, 1fr); }
+  .skills { grid-template-columns: minmax(0, 1fr); gap: .1rem; }
+  .skills dd { margin-bottom: .6rem; }
+  .plabel code { display: none; }
+  .ppanel .prow { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+}
+</style>
+
+<header class="wrap head">
+  <a href="#/" class="name">Gokul Ramanan</a>
+  <nav class="nav" aria-label="Main">
+    <a href="#/work" data-nav="work">Work</a><a href="#/notes" data-nav="notes">Notes</a><a href="#/about" data-nav="about">About</a><a href="#/resume" data-nav="resume">Résumé</a>
+    <a href="#/contact" class="cta">Get in touch</a>
+  </nav>
+</header>
+
+<!-- ============ / ============ -->
+<main class="wrap" data-page="home">
+  <section class="section">
+    <div class="row">
+      <div>
+        <p class="eyebrow">Software engineer at JPMorgan Chase · Mumbai</p>
+        <h1>I build <mark>real-time systems</mark> for internal sales teams and external clients.</h1>
+      </div>
+      <aside class="note">
+        Mostly backend work, in Java and Spring Boot.
+        <svg data-rough="arrow" viewBox="0 0 130 64" aria-hidden="true"></svg>
+      </aside>
+    </div>
+    <div class="row">
+      <div>
+        <p class="intro">I'm a backend engineer. I work on live data streaming and alerting, with a focus on low latency and high availability: apps that respond fast and keep running when something fails. I use AI coding tools to assist with my daily workflows.</p>
+        <div class="paths">
+          <a href="#/resume" class="path"><small>Hiring?</small><span>Here's my résumé →</span></a>
+          <a href="#/contact" class="path launch-only"><small>Want to talk?</small><span>Say hello →</span></a>
+          <a href="#/contact" class="path later-only"><small>Building something?</small><span>Tell me about it →</span></a>
+        </div>
+      </div>
+      <aside class="note">Weekdays: code.<br>Weekends: football.<br>Most evenings: the gym.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2><a href="#/work/alerts">Building a BWIC alert system from scratch</a></h2>
+        <p class="sub">Case study · 2026</p>
+        <figure class="fig">
+          <svg data-rough="alerts" viewBox="0 0 680 300" role="img" aria-label="Sketch: BWIC data arrives over AMPS at the rule engine, the leader, which evaluates alerts every 30 seconds and sends them to eTrading platform screens. A standby instance takes over if the leader fails."></svg>
+          <figcaption>A rough sketch of how it fits together.</figcaption>
+        </figure>
+        <div class="body">
+          <p>Sales teams and clients get alerts about BWICs, which are bond auctions. I was the server lead for a new alert service, and I designed and launched it from scratch.</p>
+          <p>It's a rule engine that checks each alert separately over AMPS, a messaging engine. It supports nested AND/OR filters. It uses leader election, so if the leader fails, another instance takes over automatically.</p>
+        </div>
+        <a href="#/work/alerts" class="more">Read the full story</a>
+      </div>
+      <aside class="note">I was the server lead on this one.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="entry">
+        <h3><a href="#/work/bond-data-platform">Redesigning a live bond data platform</a></h3>
+        <p>This platform streams RFQs (requests for quote) and trades, so sales teams and clients have the relevant bond data before they act. I redesigned it. Data now reaches them with much lower latency, the platform handles far more volume, and the rollout had no downtime.</p>
+        <a href="#/work/bond-data-platform" class="more">Read the full story</a>
+      </div>
+      <aside class="note"></aside>
+    </div>
+    <div class="row">
+      <div class="entry">
+        <h3><a href="#/work/alert-defects">Fixing BWIC alerts in production</a></h3>
+        <p>I led the root-cause analysis of a production bug in our BWIC alert service: people were getting repeated notifications for the same alert. The cause was in how a standby took over as leader. I fixed it, and the extra subscriptions closed on their own.</p>
+        <a href="#/work/alert-defects" class="more">Read the full story</a>
+      </div>
+      <aside class="note">I found this bug in a service I'd built myself.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2>Notes</h2>
+        <ul class="list">
+          <li><b><a href="#/notes/alerts-fired-twice">Why our alerts fired twice after a failover</a></b><span>What happened when a standby took over, and how we found it.</span></li>
+          <li><b><a href="#/notes/union-and-intersection">Filtering live bond data with union and intersection</a></b><span>How multi-select filters and a visibility policy became two set operations.</span></li>
+        </ul>
+        <a href="#/notes" class="more">All notes</a>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2>Also at JPMorgan Chase</h2>
+        <ul class="list">
+          <li><b>Moving to Kubernetes</b><span>Migrated the BWIC eTrading platform from legacy virtual machines to Kubernetes. Infrastructure cost fell by 75%, with zero production incidents during the rollout.</span></li>
+          <li><b>Security work</b><span>Migrated ten microservices from X.509 certificates to Kerberos, which ended manual certificate management. Also automated security scans in build pipelines across more than 30 repositories.</span></li>
+          <li><b>A new asset class</b><span>Delivered CMO Cash (fixed- and floating-rate bond BWICs) end to end as the platform's third asset class: live streams, the bidding workflow, AMPS publishing and alert evaluation.</span></li>
+          <li><b>Daily feed outage</b><span>Ended a recurring daily outage in the eTrading feed, caused by direct-memory exhaustion, silent WebSocket reconnects and lost logs. Production incidents dropped sharply.</span></li>
+        </ul>
+      </div>
+      <aside class="note"></aside>
+    </div>
+    <div class="row">
+      <div>
+        <h2>Personal projects</h2>
+        <ul class="list">
+          <li><b><a href="https://devpost.com/software/super-saviours" target="_blank" rel="noopener">Super Saviours</a></b><span>A real-time emergency response app that uses Google Maps and Places. Our team won UHack 2022 (University of Quebec, Canada) with it.</span></li>
+          <li><b><a href="https://github.com/gokul5102/Fuel-Route-Planner" target="_blank" rel="noopener">Fuel Route Planner</a></b><span>A Django API. Give it two places in the US, and it returns the route, the cheapest fuel stops and the total fuel cost.</span></li>
+        </ul>
+      </div>
+      <aside class="note">More of my projects are on <a href="https://github.com/gokul5102" target="_blank" rel="noopener">GitHub</a>.</aside>
+    </div>
+  </section>
+</main>
+
+<!-- ============ /work ============ -->
+<main class="wrap" data-page="work" hidden>
+  <section class="section">
+    <div class="row">
+      <div>
+        <p class="eyebrow">Work</p>
+        <h1>My work</h1>
+        <p class="intro">Three projects from my time at JPMorgan Chase. Each one covers the problem, what I built, the result and how I worked.</p>
+      </div>
+      <aside class="note">Each one is a short read.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="entry">
+        <p class="eyebrow">Case study · 2026 · Server lead</p>
+        <h3><a href="#/work/alerts">Building a BWIC alert system from scratch</a></h3>
+        <p>Sales teams and clients get alerts about BWICs, which are bond auctions. I was the server lead for a new alert service, and I designed and launched it from scratch. It's a rule engine that checks each alert separately over AMPS, a messaging engine. It supports nested AND/OR filters. It uses leader election, so if the leader fails, another instance takes over automatically.</p>
+        <a href="#/work/alerts" class="more">Read the full story</a>
+      </div>
+      <aside class="note">I was the server lead on this one.</aside>
+    </div>
+    <div class="row">
+      <div class="entry">
+        <p class="eyebrow">Case study · 2025 · Led the redesign</p>
+        <h3><a href="#/work/bond-data-platform">Redesigning a live bond data platform</a></h3>
+        <p>This platform streams RFQs (requests for quote) and trades, so sales teams and clients have the relevant bond data before they act. I redesigned it. Data now reaches them with much lower latency, the platform handles far more volume, and the rollout had no downtime.</p>
+        <a href="#/work/bond-data-platform" class="more">Read the full story</a>
+      </div>
+      <aside class="note"></aside>
+    </div>
+    <div class="row">
+      <div class="entry">
+        <p class="eyebrow">Case study · 2026 · Led the root-cause analysis</p>
+        <h3><a href="#/work/alert-defects">Fixing BWIC alerts in production</a></h3>
+        <p>I led the root-cause analysis of a production bug in our BWIC alert service: people were getting repeated notifications for the same alert. The cause was in how a standby took over as leader. I fixed it, and the extra subscriptions closed on their own.</p>
+        <a href="#/work/alert-defects" class="more">Read the full story</a>
+      </div>
+      <aside class="note">I found this bug in a service I'd built myself.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2>Also at JPMorgan Chase</h2>
+        <ul class="list">
+          <li><b>Moving to Kubernetes</b><span>Migrated the BWIC eTrading platform from legacy virtual machines to Kubernetes. Infrastructure cost fell by 75%, with zero production incidents during the rollout.</span></li>
+          <li><b>Security work</b><span>Migrated ten microservices from X.509 certificates to Kerberos, which ended manual certificate management. Also automated security scans in build pipelines across more than 30 repositories.</span></li>
+          <li><b>A new asset class</b><span>Delivered CMO Cash (fixed- and floating-rate bond BWICs) end to end as the platform's third asset class: live streams, the bidding workflow, AMPS publishing and alert evaluation.</span></li>
+          <li><b>Daily feed outage</b><span>Ended a recurring daily outage in the eTrading feed, caused by direct-memory exhaustion, silent WebSocket reconnects and lost logs. Production incidents dropped sharply.</span></li>
+        </ul>
+      </div>
+      <aside class="note"></aside>
+    </div>
+    <div class="row">
+      <div>
+        <h2>Personal projects</h2>
+        <ul class="list">
+          <li><b><a href="https://devpost.com/software/super-saviours" target="_blank" rel="noopener">Super Saviours</a></b><span>A real-time emergency response app that uses Google Maps and Places. Our team won UHack 2022 (University of Quebec, Canada) with it.</span></li>
+          <li><b><a href="https://github.com/gokul5102/Fuel-Route-Planner" target="_blank" rel="noopener">Fuel Route Planner</a></b><span>A Django API. Give it two places in the US, and it returns the route, the cheapest fuel stops and the total fuel cost.</span></li>
+        </ul>
+      </div>
+      <aside class="note">More of my projects are on <a href="https://github.com/gokul5102" target="_blank" rel="noopener">GitHub</a>.</aside>
+    </div>
+  </section>
+</main>
+
+<!-- ============ /work/alerts ============ -->
+<main class="wrap" data-page="cs-alerts" hidden>
+  <section class="section">
+    <a href="#/work" class="back">← All work</a>
+    <div class="row">
+      <div>
+        <p class="eyebrow">Case study · 2026 · Server lead</p>
+        <h1>Building a BWIC alert system from scratch</h1>
+        <p class="intro">Internal sales teams and external clients get alerts about BWICs, which are bond auctions. I was the server lead for a new alert service, which I designed and launched from scratch.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The problem</h2>
+        <p>Sales teams and clients rely on alerts to follow BWICs, so notification latency matters. An alert is only useful if it arrives quickly. The service needed lower latency, and it needed to evaluate far more alerts concurrently.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2>What I built</h2>
+        <figure class="fig">
+          <svg data-rough="alerts" viewBox="0 0 680 300" role="img" aria-label="Sketch: BWIC data arrives over AMPS at the rule engine, the leader, which evaluates alerts every 30 seconds and sends them to eTrading platform screens. A standby instance takes over if the leader fails."></svg>
+          <figcaption>A rough sketch of how it fits together.</figcaption>
+        </figure>
+        <div class="body">
+          <p>The service is a rule engine. It evaluates each alert separately, over AMPS, a messaging engine, so one complex alert can't slow down the rest.</p>
+          <p>Alerts support nested AND/OR filters, so a single alert can combine many conditions.</p>
+          <p>Alerts are evaluated in 30-second batch cycles. If several BWICs match an alert within one cycle, the user gets a single notification for all of them, not one per match. That keeps notifications useful instead of noisy.</p>
+          <p>The service runs as several instances and uses leader election. If the leader fails, another instance takes over automatically, so the service stays highly available.</p>
+        </div>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The result</h2>
+        <p>Within each cycle, notifications now go out with <mark>33% lower latency</mark>. The engine also handles 2,000 concurrent alerts, four times what it could before.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>How I worked</h2>
+        <p>As server lead, I architected the service and took it through to launch. I built it with agentic AI-assisted development, using GitHub Copilot agents with custom instructions and skills.</p>
+        <p class="built"><span>Built with</span> Java · Spring Boot · AMPS · GitHub Copilot</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Next story</p>
+    <a href="#/work/bond-data-platform" class="next-link">Redesigning a live bond data platform →</a>
+  </section>
+</main>
+
+<!-- ============ /work/bond-data-platform ============ -->
+<main class="wrap" data-page="cs-platform" hidden>
+  <section class="section">
+    <a href="#/work" class="back">← All work</a>
+    <div class="row">
+      <div>
+        <p class="eyebrow">Case study · 2025 · Led the redesign</p>
+        <h1>Redesigning a live bond data platform</h1>
+        <p class="intro">This real-time streaming platform sends RFQs (requests for quote) and trades to internal sales teams and external clients, so they have the relevant bond data before they act. I redesigned it, and it now has much lower latency and handles far more volume.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The problem</h2>
+        <p>Sales teams and clients use this data to decide what to do next, so it has to be current. The platform needed lower latency, and it needed to handle much higher volumes of RFQs and trades.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2>What I built</h2>
+        <figure class="fig">
+          <svg data-rough="bond-data" viewBox="0 0 680 300" role="img" aria-label="Sketch: RFQs and trades flow through a reactive pipeline to sales and client screens. The pipeline takes the union of everything a person picked, then the intersection with what they're allowed to see."></svg>
+          <figcaption>A rough sketch of how it fits together.</figcaption>
+        </figure>
+        <div class="body">
+          <p>I rebuilt the data flow with reactive programming in Java, so RFQs and trades stream through the platform as they arrive.</p>
+          <p>People can filter by several fields, such as trader, client or bond (by ISIN), and pick more than one value in each. The platform then shows the union of the data for everything they picked.</p>
+          <p>A visibility policy decides what each person can see. For example, a salesperson can see data for all the clients they cover. The platform applies it as an intersection, so a view only ever contains data that person is allowed to see.</p>
+          <p>Using set operations for both kept filtering efficient at high volume.</p>
+        </div>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The result</h2>
+        <p>Users now get data with <mark>75% lower latency</mark>, and the platform handles 10 times the volume it did before. The production rollout had zero downtime.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>How I worked</h2>
+        <p>I led the redesign, working with other engineers on the team. Before the rollout, we tested it end to end in our test environments. Then we moved users over in stages, after A/B testing. That's how we kept the rollout at zero downtime.</p>
+        <p class="built"><span>Built with</span> Java · Spring Boot · Spring WebFlux · AMPS</p>
+      </div>
+      <aside class="note">I wrote a Note on the filtering: <a href="#/notes/union-and-intersection">Filtering live bond data with union and intersection</a>.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Next story</p>
+    <a href="#/work/alert-defects" class="next-link">Fixing BWIC alerts in production →</a>
+  </section>
+</main>
+
+<!-- ============ /work/alert-defects ============ -->
+<main class="wrap" data-page="cs-defects" hidden>
+  <section class="section">
+    <a href="#/work" class="back">← All work</a>
+    <div class="row">
+      <div>
+        <p class="eyebrow">Case study · 2026 · Led the root-cause analysis</p>
+        <h1>Fixing BWIC alerts in production</h1>
+        <p class="intro">Internal sales teams and external clients rely on BWIC alerts. In production, our alert service started sending repeated notifications for the same alert. It was a top-priority issue, and I led the root-cause analysis.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The problem</h2>
+        <p>Sales teams and clients rely on alerts to follow BWICs. They were getting several notifications for the same alert, by email and in their feed, even when bonds were updating less often. It was rated top priority, so it needed to be found and fixed quickly.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div>
+        <h2>What I fixed</h2>
+        <figure class="fig">
+          <svg data-rough="alert-defects" viewBox="0 0 680 300" role="img" aria-label="Sketch: the leader pod fails and the standby pod takes over. The last 30-second batch carries over, so the same alert fires twice. After the fix, each alert sends one notification per cycle."></svg>
+          <figcaption>How a takeover made alerts fire twice.</figcaption>
+        </figure>
+        <div class="body">
+          <p>I traced it with Splunk logs, AMPS health queries and the number of active subscriptions per alert. Then I matched the AMPS topic that holds every user's alert subscriptions against the alerts that were actually firing.</p>
+          <p>That showed where the duplicate and dormant subscriptions came from. When a standby pod took over as leader, the last 30-second evaluation batch carried over, so the alerts in that cycle fired twice. Each takeover left extra subscriptions behind.</p>
+          <p>I fixed the root cause in how the takeover handled the evaluation batch. I didn't delete any subscriptions by hand. Once the cause was fixed, the dormant ones closed in AMPS on their own.</p>
+        </div>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The result</h2>
+        <p>Active subscriptions fell from <mark>2,172 to 45</mark>, a 98% drop, and alerting was back to normal. Each alert now sends one notification per cycle again.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>How I worked</h2>
+        <p>I led the root-cause analysis. Deleting the extra subscriptions would only have hidden the problem, so I looked for why they were being created. Once we fixed that, they stopped piling up.</p>
+        <p class="built"><span>Built with</span> Java · Spring Boot · AMPS · Splunk · Kubernetes</p>
+      </div>
+      <aside class="note">I wrote a Note on how we found it: <a href="#/notes/alerts-fired-twice">Why our alerts fired twice after a failover</a>.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Next story</p>
+    <a href="#/work/alerts" class="next-link">Building a BWIC alert system from scratch →</a>
+  </section>
+</main>
+
+<!-- ============ /notes ============ -->
+<main class="wrap" data-page="notes" hidden>
+  <section class="section">
+    <div class="row">
+      <div>
+        <p class="eyebrow">Notes</p>
+        <h1>Notes</h1>
+        <p class="intro">Short write-ups of things I've learned at work, and now and then something that isn't about work.</p>
+        <ul class="notes" style="margin-top:1.6rem">
+          <li>
+            <p class="meta"><span>Nov 2026</span><span class="tag">Engineering</span></p>
+            <h3><a href="#/notes/alerts-fired-twice">Why our alerts fired twice after a failover</a></h3>
+            <p>What happened when a standby took over, and how we found it.</p>
+          </li>
+          <li>
+            <p class="meta"><span>Nov 2026</span><span class="tag">Engineering</span></p>
+            <h3><a href="#/notes/union-and-intersection">Filtering live bond data with union and intersection</a></h3>
+            <p>How multi-select filters and a visibility policy became two set operations.</p>
+          </li>
+        </ul>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+</main>
+
+<!-- ============ /notes/alerts-fired-twice ============ -->
+<main class="wrap" data-page="note-twice" hidden>
+  <section class="section">
+    <a href="#/notes" class="back">← All notes</a>
+    <div class="row">
+      <div>
+        <p class="meta" style="margin-bottom:1rem"><span>Nov 2026</span><span class="tag">Engineering</span></p>
+        <h1>Why our alerts fired twice after a failover</h1>
+        <p class="intro">What happened when a standby took over, and how we found it.</p>
+      </div>
+      <aside class="note">The full story is in the Case study <a href="#/work/alert-defects">Fixing BWIC alerts in production</a>.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>What we saw</h2>
+        <p>People were getting the same alert more than once, by email and in their feed. It happened even when there weren't many bond updates. It was a top-priority issue, and I led the investigation.</p>
+
+        <h2>How we tracked it down</h2>
+        <p>The Splunk logs came first, then AMPS: its health, and the number of active subscriptions on each alert. A few alerts had far more than they should have.</p>
+        <p>The real clue came from comparing two lists: every alert subscription in the AMPS topic, and the alerts that were actually firing. The gap between them showed the duplicates and the dormant ones.</p>
+
+        <h2>The cause</h2>
+        <p>The alert service runs with a leader pod and a standby pod. When the leader failed, the standby took over, but it carried over the last 30-second evaluation batch. So the alerts in that batch fired again, and each takeover left extra subscriptions behind.</p>
+
+        <h2>The fix</h2>
+        <p>We changed the failover so that alerts that had already fired were closed properly instead of being carried over. After that, the duplicate subscriptions stopped showing up in the AMPS alerts topic.</p>
+        <p>Now each alert sends at most one notification per 30-second cycle, and only if a BWIC matches it. A recurring alert just moves on to the next cycle.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Read next</p>
+    <a href="#/notes/union-and-intersection" class="next-link">Filtering live bond data with union and intersection →</a>
+  </section>
+</main>
+
+<!-- ============ /notes/union-and-intersection ============ -->
+<main class="wrap" data-page="note-sets" hidden>
+  <section class="section">
+    <a href="#/notes" class="back">← All notes</a>
+    <div class="row">
+      <div>
+        <p class="meta" style="margin-bottom:1rem"><span>Nov 2026</span><span class="tag">Engineering</span></p>
+        <h1>Filtering live bond data with union and intersection</h1>
+        <p class="intro">How multi-select filters and a visibility policy became two set operations.</p>
+      </div>
+      <aside class="note">The full story is in the Case study <a href="#/work/bond-data-platform">Redesigning a live bond data platform</a>.</aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>The setup</h2>
+        <p>Sales teams and clients use this platform to watch RFQs and trades as they come in. The data streams through with Spring WebFlux, and the screen lets people filter it by trader, client or bond (ISIN).</p>
+
+        <h2>Picking more than one value</h2>
+        <p>Every filter allows multi-select. Pick two traders, or three clients, and the screen shows everything for all of them. That's a union: the data for each value, merged into one view.</p>
+
+        <h2>Showing only what you're allowed to see</h2>
+        <p>Not everyone can see everything. A salesperson sees data for the clients they cover, and nothing else. That's an intersection: of everything the filters picked, only the part that overlaps with what the visibility policy allows.</p>
+
+        <h2>Why sets worked well</h2>
+        <p>Thinking of both as set operations kept the filtering simple and fast, even as the volume grew to ten times what it was before.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <p class="eyebrow">Read next</p>
+    <a href="#/notes/alerts-fired-twice" class="next-link">Why our alerts fired twice after a failover →</a>
+  </section>
+</main>
+
+<!-- ============ /about ============ -->
+<main class="wrap" data-page="about" hidden>
+  <section class="section">
+    <div class="row">
+      <div>
+        <p class="eyebrow">About</p>
+        <h1>Hi, I'm Gokul.</h1>
+        <p class="intro">I'm a backend engineer at JPMorgan Chase in Mumbai. I build real-time systems for internal sales teams and external clients.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="body">
+        <h2>How I got here</h2>
+        <p>I joined JPMorgan Chase as an intern in February 2023, during my last semester of a B.Tech in Information Technology at Sardar Patel Institute of Technology. I worked on FX tools and live bond data first, and on BWIC eTrading and alerts since 2026.</p>
+        <p>I've also been a subject-matter expert at the Code for Good hackathon, helping teams with technical problems.</p>
+      </div>
+      <aside class="note"></aside>
+    </div>
+    <div class="row">
+      <div class="body">
+        <h2>Tools I work with</h2>
+        <dl class="skills">
+          <dt>Languages</dt><dd>Java, Python, C/C++</dd>
+          <dt>Backend</dt><dd>Spring Boot, Spring WebFlux, Spring Security</dd>
+          <dt>Messaging and streaming</dt><dd>AMPS, WebSockets</dd>
+          <dt>Databases</dt><dd>MySQL, Cassandra, Elasticsearch, MongoDB</dd>
+          <dt>Infrastructure</dt><dd>Docker, Kubernetes, Jenkins</dd>
+          <dt>Monitoring</dt><dd>Splunk, Dynatrace, Grafana</dd>
+          <dt>Testing</dt><dd>JUnit, JMeter</dd>
+          <dt>AI</dt><dd>GitHub Copilot, MCP, custom instructions, skills and agents</dd>
+          <dt>Also used</dt><dd>React, Django</dd>
+        </dl>
+      </div>
+      <aside class="note"></aside>
+    </div>
+    <div class="row">
+      <div class="body">
+        <h2>Outside work</h2>
+        <p>I code outside work too, mostly side projects. You'll find them on my <a href="https://github.com/gokul5102" target="_blank" rel="noopener" style="border-bottom:1.4px solid currentColor">GitHub</a>. Weekends are for football, and most evenings end at the gym. I also like keeping up with what's new in AI.</p>
+        <div class="paths">
+          <a href="#/resume" class="path"><small>Hiring?</small><span>Here's my résumé →</span></a>
+          <a href="#/contact" class="path launch-only"><small>Want to talk?</small><span>Say hello →</span></a>
+          <a href="#/contact" class="path later-only"><small>Building something?</small><span>Tell me about it →</span></a>
+        </div>
+      </div>
+      <aside class="note"></aside>
+    </div>
+  </section>
+</main>
+
+<!-- ============ /resume ============ -->
+<main class="wrap" data-page="resume" hidden>
+  <section class="section">
+    <div class="row">
+      <div>
+        <p class="eyebrow">Résumé</p>
+        <h1>Gokul Ramanan</h1>
+        <p class="intro" style="margin-top:.6rem">Software Engineer II at JPMorgan Chase · Mumbai, India</p>
+        <p class="cv-contact">
+          <span class="email">gokulr5102@gmail.com</span>
+          <a href="https://www.linkedin.com/in/gokul-ramanan1" target="_blank" rel="noopener">linkedin.com/in/gokul-ramanan1</a>
+          <a href="https://github.com/gokul5102" target="_blank" rel="noopener">github.com/gokul5102</a>
+        </p>
+        <a href="#" data-proto class="cta dl">Download the PDF</a>
+      </div>
+      <aside class="note">Want the full stories? <a href="#/work">They're on the Work page.</a></aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="row">
+      <div class="cv">
+        <h2>Experience</h2>
+        <h3>JPMorgan Chase &amp; Co., Mumbai</h3>
+
+        <p class="role">Software Engineer II <span>Feb 2026 – present</span></p>
+        <ul class="bul">
+          <li>Built a new BWIC (bond auction) alerting service for internal sales teams and external clients from scratch as server lead: a rule engine with leader election, per-alert evaluation over AMPS and nested AND/OR filters. Cut notification latency by 33% and scaled to 2,000 concurrent alerts (4x), using agentic AI-assisted development.</li>
+          <li>Moved the BWIC eTrading platform from legacy virtual machines to Kubernetes, cutting infrastructure cost by 75% with zero production incidents during rollout.</li>
+          <li>Delivered a third asset class (fixed- and floating-rate CMOs) end to end: live streams, bidding workflow, AMPS publishing and alert evaluation.</li>
+          <li>Led root-cause analysis on top-priority alerting defects caused by dormant and duplicate subscriptions, cutting active subscriptions from 2,172 to 45 (98%) and restoring alerting. Ended a recurring daily feed outage caused by direct-memory exhaustion, silent WebSocket reconnects and log loss.</li>
+          <li>Re-engineered a real-time streaming grid of TBA BWICs handling 4–5 updates a second: replaced a 200 KB one-shot snapshot with configurable batched streaming and removed column lag, increasing adoption.</li>
+        </ul>
+
+        <p class="role">Software Engineer I <span>Jun 2023 – Jan 2026</span></p>
+        <ul class="bul">
+          <li>Redesigned a real-time streaming platform for bond quote requests and trade data: 75% lower latency for users and 10x the volume, with zero downtime during rollout.</li>
+          <li>Reached 99.8% uptime on the AMPS messaging layer through an infrastructure pool migration, and enabled secure client connections through a host migration.</li>
+          <li>Migrated 10 microservices from X.509 certificates to Kerberos authentication, removing manual certificate management.</li>
+          <li>Automated security scans in Jenkins pipelines across 30+ repositories.</li>
+          <li>Improved Grafana dashboards across FX services, cutting incident response time.</li>
+        </ul>
+
+        <p class="role">Software Engineer Intern <span>Feb 2023 – May 2023</span></p>
+        <ul class="bul">
+          <li>Implemented credit-risk regulatory checks for all FX trade types in the voice booking workflow.</li>
+          <li>Built fuzzy Elasticsearch acronym search and fund-to-acronym mapping endpoints, speeding up client lookup.</li>
+        </ul>
+
+        <h2>Education</h2>
+        <p class="role">Sardar Patel Institute of Technology, Mumbai <span>2019 – 2023</span></p>
+        <p style="margin-top:.35rem;line-height:1.6">B.Tech in Information Technology · CGPA 9.58</p>
+
+        <h2>Skills</h2>
+        <dl class="skills">
+          <dt>Languages</dt><dd>Java, C/C++, Python, HTML, CSS</dd>
+          <dt>Frameworks</dt><dd>Spring Boot, Spring Security, React, Django</dd>
+          <dt>Databases</dt><dd>MySQL, Cassandra, Elasticsearch, MongoDB</dd>
+          <dt>Cloud</dt><dd>Docker, Kubernetes, Firebase</dd>
+          <dt>AI</dt><dd>GitHub Copilot, Model Context Protocol (MCP), custom instructions, skills, agents</dd>
+          <dt>Tools</dt><dd>Git, AMPS, JUnit, JMeter, Heroku, Grafana, Jenkins, Splunk, Dynatrace</dd>
+        </dl>
+
+        <h2>Achievements</h2>
+        <ul class="bul">
+          <li>Won UHack 2022, run by the University of Quebec, with Super Saviours, a real-time emergency-response app built on Google Maps and Places.</li>
+          <li>Subject-matter expert at JPMorgan Chase's Code for Good hackathon, mentoring teams through technical problems.</li>
+          <li>Run monthly training sessions on product knowledge and AI tools for 50+ team members.</li>
+          <li>Passed the AWS Cloud Practitioner certification exam.</li>
+          <li>Solved 450+ problems on LeetCode and 220+ on GeeksforGeeks.</li>
+        </ul>
+      </div>
+      <aside class="note">Email is the quickest way to reach me.</aside>
+    </div>
+  </section>
+</main>
+
+<!-- ============ /contact ============ -->
+<main class="wrap" data-page="contact" hidden>
+  <section class="section">
+    <a href="#/" class="back">← Back to the homepage</a>
+    <div class="row">
+      <div>
+        <p class="eyebrow">Contact</p>
+        <h1>Say hello.</h1>
+        <p class="intro launch-only">Hiring, or want to talk about real-time systems? Write to me here, and it comes straight to my inbox.</p>
+        <p class="intro later-only">Hiring, building something, or want to talk about real-time systems? Write to me here, and it comes straight to my inbox.</p>
+        <form class="form" id="contact-form" name="contact" novalidate>
+          <div class="field">
+            <label for="cf-name">Your name</label>
+            <input id="cf-name" name="name" type="text" autocomplete="name">
+          </div>
+          <div class="field">
+            <label for="cf-email">Your email</label>
+            <input id="cf-email" name="email" type="email" autocomplete="email">
+          </div>
+          <fieldset class="field">
+            <legend>What's this about?</legend>
+            <div class="choices">
+              <label class="choice"><input type="radio" name="topic" id="cf-topic-job" value="job"><span>A job</span></label>
+              <label class="choice later-only"><input type="radio" name="topic" id="cf-topic-project" value="project"><span>A project</span></label>
+              <label class="choice"><input type="radio" name="topic" id="cf-topic-other" value="other"><span>Something else</span></label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="cf-message">Your message</label>
+            <textarea id="cf-message" name="message" rows="6"></textarea>
+          </div>
+          <input type="hidden" name="via" id="cf-via" value="">
+          <p hidden><label>Leave this empty: <input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+          <p class="form-error" id="cf-error" role="alert" hidden></p>
+          <div class="form-fail" id="cf-fail" role="alert" hidden>
+            <b>That didn't send.</b>
+            <span>Something went wrong on my side. Your message is still here, so you can copy it and email me directly:</span>
+            <span class="email">gokulr5102@gmail.com</span>
+          </div>
+          <button type="submit" class="send">Send it</button>
+        </form>
+        <div class="sent" id="cf-sent" hidden>
+          <h2>Thanks, it's on its way.</h2>
+          <p>I'll reply by email.</p>
+          <span class="proto-note" id="cf-payload"></span>
+        </div>
+      </div>
+      <aside class="note">
+        Prefer email? Write to <span class="email">gokulr5102@gmail.com</span>
+        <br><br>
+        It's <span data-clock class="num">Mumbai (IST)</span> here, <span data-awake>so I'm probably around</span>.
+      </aside>
+    </div>
+  </section>
+</main>
+
+<!-- ============ 404 ============ -->
+<main class="wrap" data-page="404" hidden>
+  <section class="section">
+    <div class="row">
+      <div>
+        <p class="eyebrow">404</p>
+        <h1>This page isn't here.</h1>
+        <p class="intro">It may have moved, or the link has a typo. The homepage is a good place to start.</p>
+        <p style="margin-top:1.4rem"><a href="#/" class="next-link">Go to the homepage →</a></p>
+      </div>
+      <aside class="note">If one of my links sent you here, tell me and I'll fix it.</aside>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap"><div class="foot">
+  <h2>Say hello.</h2>
+  <span class="email">gokulr5102@gmail.com</span>
+  <div class="foot-links">
+    <a href="https://www.linkedin.com/in/gokul-ramanan1" target="_blank" rel="noopener">LinkedIn</a>
+    <a href="https://github.com/gokul5102" target="_blank" rel="noopener">GitHub</a>
+    <a href="#" data-proto>Résumé (PDF)</a>
+    <span>It's <span data-clock class="num">Mumbai (IST)</span> here in Mumbai.</span>
+  </div>
+  <small><span class="later-only">I also take on freelance projects. · </span>Built with Astro, hosted on Netlify. © 2026 Gokul Ramanan.</small>
+</div></footer>
+
+<!-- ============ Prototype controls (not part of the design) ============ -->
+<div class="ppanel" id="ppanel" hidden>
+  <div class="prow"><span>Theme</span><div class="seg" data-key="theme"><button data-v="auto">Auto</button><button data-v="light">Light</button><button data-v="dark">Dark</button></div></div>
+  <div class="prow"><span>Copy</span><div class="seg" data-key="copy"><button data-v="launch">Launch</button><button data-v="later">Later (freelance)</button></div></div>
+  <div class="prow"><span>Mumbai clock</span><div class="seg" data-key="clock"><button data-v="live">Live</button><button data-v="night">3:05 am</button></div></div>
+  <div class="prow"><span>Form result</span><div class="seg" data-key="form"><button data-v="sends">Sends</button><button data-v="fails">Fails</button></div></div>
+  <div class="prow"><label for="pvia">Arrived via</label><input id="pvia" placeholder="e.g. acme-email (or add ?via= to the URL)"></div>
+  <div class="state" id="pstate"></div>
+  <div class="hint">← → keys switch pages. Every sentence is agreed copy from the spec.</div>
+</div>
+<div class="pbar" role="toolbar" aria-label="Prototype pages">
+  <button id="pprev" aria-label="Previous page">←</button>
+  <span class="plabel" id="plabel"></span>
+  <button id="pnext" aria-label="Next page">→</button>
+  <button id="popt" class="popt" aria-expanded="false" aria-controls="ppanel">Options</button>
+</div>
+
+<script>
+(function () {
+  document.addEventListener('click', function (e) {
+    if (e.target.closest('a[data-proto]')) e.preventDefault();
+  });
+
+  /* ---------- State (in memory only) ---------- */
+  var state = { theme: 'auto', copy: 'launch', marks: 'on', clock: 'live', form: 'sends', via: null, viaRaw: '' };
+
+  /* ---------- Routes ---------- */
+  var ROUTES = [
+    { path: '/', page: 'home', name: 'Homepage' },
+    { path: '/work', page: 'work', name: 'Work' },
+    { path: '/work/alerts', page: 'cs-alerts', name: 'Case study: alert system' },
+    { path: '/work/bond-data-platform', page: 'cs-platform', name: 'Case study: bond data platform' },
+    { path: '/work/alert-defects', page: 'cs-defects', name: 'Case study: alert defects' },
+    { path: '/notes', page: 'notes', name: 'Notes' },
+    { path: '/notes/alerts-fired-twice', page: 'note-twice', name: 'Note: alerts fired twice' },
+    { path: '/notes/union-and-intersection', page: 'note-sets', name: 'Note: union and intersection' },
+    { path: '/about', page: 'about', name: 'About' },
+    { path: '/resume', page: 'resume', name: 'Résumé' },
+    { path: '/contact', page: 'contact', name: 'Contact' },
+    { path: '/no-such-page', page: '404', name: '404 page' }
+  ];
+  var current = ROUTES[0];
+
+  function readHash() {
+    var h = (location.hash || '').replace(/^#/, '');
+    var q = h.indexOf('?');
+    if (q >= 0) h = h.slice(0, q);
+    return h || '/';
+  }
+  function route() {
+    var path = readHash();
+    var r = ROUTES.filter(function (x) { return x.path === path && x.page !== '404'; })[0];
+    current = r || ROUTES[ROUTES.length - 1];
+    document.querySelectorAll('main[data-page]').forEach(function (el) { el.hidden = el.dataset.page !== current.page; });
+    document.body.dataset.page = current.page;
+    document.querySelectorAll('[data-nav]').forEach(function (a) {
+      var on = path === '/' + a.dataset.nav || path.indexOf('/' + a.dataset.nav + '/') === 0;
+      if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+    });
+    readVia(location.search + '&' + location.hash);
+    window.scrollTo(0, 0);
+    render();
+  }
+  function go(step) {
+    var i = ROUTES.indexOf(current);
+    var next = ROUTES[(i + step + ROUTES.length) % ROUTES.length];
+    location.hash = '#' + next.path;
+  }
+
+  /* ---------- ?via= tag (spec, Behaviour). Format rule is a prototype proposal. ---------- */
+  function checkVia(raw) {
+    var v = (raw || '').trim().toLowerCase();
+    return /^[a-z0-9][a-z0-9-]{0,39}$/.test(v) ? v : null;
+  }
+  function readVia(s) {
+    var m = s.match(/[?&]via=([^&#]*)/);
+    if (!m) return;
+    state.viaRaw = decodeURIComponent(m[1]);
+    var ok = checkVia(state.viaRaw);
+    if (ok) state.via = ok;
+    document.getElementById('pvia').value = state.viaRaw;
+  }
+
+  /* ---------- Mumbai clock ---------- */
+  var timeFmt = new Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit', hour12: true });
+  var hourFmt = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', hourCycle: 'h23' });
+  var NIGHT = new Date('2026-11-16T21:35:00Z'); /* 3:05 am in Mumbai */
+  function clockText() {
+    var now = state.clock === 'night' ? NIGHT : new Date();
+    return { time: timeFmt.format(now), awake: parseInt(hourFmt.format(now), 10) >= 7 };
+  }
+  function tick() {
+    var c = clockText();
+    document.querySelectorAll('[data-clock]').forEach(function (el) { el.textContent = c.time; });
+    document.querySelectorAll('[data-awake]').forEach(function (el) {
+      el.textContent = c.awake ? 'so I’m probably around' : 'so I’m probably asleep';
+    });
+  }
+  setInterval(tick, 20000);
+
+  /* ---------- Contact form: validates, sends nothing ---------- */
+  var form = document.getElementById('contact-form');
+  var errorEl = document.getElementById('cf-error');
+  var failEl = document.getElementById('cf-fail');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = form.elements.name.value.trim();
+    var email = form.elements.email.value.trim();
+    var topic = form.querySelector('input[name="topic"]:checked');
+    var message = form.elements.message.value.trim();
+    var problem = null, focusEl = null;
+    if (!name) { problem = 'Add your name so I know who I’m replying to.'; focusEl = form.elements.name; }
+    else if (!email) { problem = 'Add your email so I can reply.'; focusEl = form.elements.email; }
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { problem = 'That email address looks incomplete. Check it and try again.'; focusEl = form.elements.email; }
+    else if (!topic) { problem = 'Pick what this is about.'; focusEl = document.getElementById('cf-topic-job'); }
+    else if (!message) { problem = 'Write a line or two about what you need.'; focusEl = form.elements.message; }
+    failEl.hidden = true;
+    if (problem) {
+      errorEl.textContent = problem;
+      errorEl.hidden = false;
+      focusEl.focus();
+      return;
+    }
+    errorEl.hidden = true;
+    if (state.form === 'fails') { failEl.hidden = false; return; }
+    document.getElementById('cf-via').value = state.via || '';
+    document.getElementById('cf-payload').textContent =
+      'Prototype: nothing was sent. Netlify Forms would receive name="' + name + '", email="' + email +
+      '" (becomes Reply-To), topic="' + topic.value + '", via="' + (state.via || '') + '", message of ' + message.length + ' characters.';
+    form.hidden = true;
+    document.getElementById('cf-sent').hidden = false;
+  });
+
+  /* ---------- Prototype bar and options ---------- */
+  var panel = document.getElementById('ppanel');
+  var optBtn = document.getElementById('popt');
+  optBtn.addEventListener('click', function () {
+    panel.hidden = !panel.hidden;
+    optBtn.setAttribute('aria-expanded', String(!panel.hidden));
+  });
+  document.getElementById('pprev').addEventListener('click', function () { go(-1); });
+  document.getElementById('pnext').addEventListener('click', function () { go(1); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (e.key === 'ArrowLeft') go(-1);
+    if (e.key === 'ArrowRight') go(1);
+  });
+  panel.querySelectorAll('.seg').forEach(function (seg) {
+    seg.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      state[seg.dataset.key] = b.dataset.v;
+      render();
+    });
+  });
+  document.getElementById('pvia').addEventListener('input', function (e) {
+    state.viaRaw = e.target.value;
+    state.via = checkVia(state.viaRaw);
+    render();
+  });
+
+  function render() {
+    var root = document.documentElement;
+    if (state.theme === 'auto') delete root.dataset.theme; else root.dataset.theme = state.theme;
+    document.body.dataset.copy = state.copy;
+    document.body.dataset.marks = state.marks;
+    var proj = document.getElementById('cf-topic-project');
+    if (state.copy === 'launch' && proj.checked) proj.checked = false;
+    tick();
+    panel.querySelectorAll('.seg').forEach(function (seg) {
+      seg.querySelectorAll('button').forEach(function (b) {
+        b.setAttribute('aria-pressed', String(state[seg.dataset.key] === b.dataset.v));
+      });
+    });
+    document.getElementById('plabel').innerHTML = current.name + '<code>' + current.path.replace('/no-such-page', '/anything-else') + '</code>';
+    var viaNote = state.via ? state.via : (state.viaRaw ? 'none ("' + state.viaRaw + '" is not a valid tag)' : 'none');
+    document.getElementById('pstate').textContent =
+      'route ' + current.path + ' · via ' + viaNote + ' · clock "' + clockText().time + '" · copy ' + state.copy;
+  }
+
+  /* ---------- Hand-drawn sketches (real site: build time, fixed seeds) ---------- */
+  var NS = 'http://www.w3.org/2000/svg';
+  var hasRough = typeof window.rough !== 'undefined';
+  function opts(extra) {
+    var o = { stroke: 'currentColor', strokeWidth: 1.6, roughness: 1.3, bowing: 1, seed: 7 };
+    for (var k in extra) o[k] = extra[k];
+    return o;
+  }
+  function node(tag, attrs, text) {
+    var el = document.createElementNS(NS, tag);
+    for (var k in attrs) el.setAttribute(k, attrs[k]);
+    if (text) el.textContent = text;
+    return el;
+  }
+  function label(parent, x, y, text, size, anchor) {
+    parent.appendChild(node('text', { x: x, y: y, 'font-family': "Kalam, 'Comic Sans MS', cursive", 'font-size': size || 17, 'text-anchor': anchor || 'middle', fill: 'currentColor' }, text));
+  }
+  function box(parent, rc, x, y, w, h, extra) {
+    if (rc) parent.appendChild(rc.rectangle(x, y, w, h, opts(extra || {})));
+    else parent.appendChild(node('rect', { x: x, y: y, width: w, height: h, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6 }));
+  }
+  function line(parent, rc, x1, y1, x2, y2, extra) {
+    if (rc) parent.appendChild(rc.line(x1, y1, x2, y2, opts(extra || {})));
+    else parent.appendChild(node('line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: 'currentColor', 'stroke-width': 1.6 }));
+  }
+  function arrow(parent, rc, x1, y1, x2, y2, extra) {
+    line(parent, rc, x1, y1, x2, y2, extra);
+    var a = Math.atan2(y2 - y1, x2 - x1), L = 13, s = 0.45;
+    line(parent, rc, x2, y2, x2 - L * Math.cos(a - s), y2 - L * Math.sin(a - s));
+    line(parent, rc, x2, y2, x2 - L * Math.cos(a + s), y2 - L * Math.sin(a + s));
+  }
+
+  var SKETCHES = {
+    'alerts': function (rc, ink, pen) {
+      box(ink, rc, 12, 118, 150, 66);                              label(ink, 87, 146, 'BWIC data,'); label(ink, 87, 168, 'over AMPS');
+      box(ink, rc, 245, 26, 200, 96);                              label(ink, 345, 58, 'Rule engine (leader)'); label(ink, 345, 82, 'evaluates alerts', 14); label(ink, 345, 102, 'every 30 seconds', 14);
+      box(ink, rc, 255, 204, 180, 64, { strokeLineDash: [7, 6] }); label(ink, 345, 242, 'Standby instance');
+      box(ink, rc, 520, 118, 150, 66);                             label(ink, 595, 146, 'eTrading'); label(ink, 595, 168, 'platform screens');
+      arrow(ink, rc, 164, 140, 241, 88);
+      arrow(ink, rc, 164, 164, 251, 226, { strokeLineDash: [6, 6] });
+      arrow(ink, rc, 448, 88, 516, 140);
+      line(ink, rc, 345, 126, 345, 200, { strokeLineDash: [4, 6] });
+      label(pen, 448, 246, 'takes over if the', 15, 'start');
+      label(pen, 448, 265, 'leader fails', 15, 'start');
+    },
+    'bond-data': function (rc, ink, pen) {
+      box(ink, rc, 12, 112, 150, 66, { seed: 21 });                label(ink, 87, 140, 'RFQs and'); label(ink, 87, 162, 'trades');
+      box(ink, rc, 255, 104, 180, 82, { seed: 22 });               label(ink, 345, 151, 'Reactive pipeline');
+      box(ink, rc, 520, 112, 150, 66, { seed: 23 });               label(ink, 595, 140, 'Sales and'); label(ink, 595, 162, 'client screens');
+      arrow(ink, rc, 164, 145, 251, 145);
+      arrow(ink, rc, 438, 145, 516, 145);
+      label(pen, 345, 70, 'union: everything you picked', 15);
+      arrow(pen, rc, 345, 78, 345, 100, { seed: 33 });
+      label(pen, 345, 232, "intersection: what you're allowed to see", 15);
+      arrow(pen, rc, 345, 214, 345, 190, { seed: 34 });
+    },
+    'alert-defects': function (rc, ink, pen) {
+      box(ink, rc, 12, 112, 150, 66, { seed: 41 });                label(ink, 87, 140, 'Leader pod'); label(ink, 87, 162, '(fails)');
+      line(pen, rc, 8, 182, 166, 108, { seed: 42 });
+      line(pen, rc, 8, 108, 166, 182, { seed: 43 });
+      box(ink, rc, 255, 112, 170, 66, { seed: 44 });               label(ink, 340, 140, 'Standby pod'); label(ink, 340, 162, 'takes over');
+      box(ink, rc, 520, 112, 150, 66, { seed: 45 });               label(ink, 595, 140, 'Same alert'); label(ink, 595, 162, 'fires twice');
+      arrow(ink, rc, 166, 145, 251, 145);
+      arrow(ink, rc, 428, 145, 516, 145);
+      label(pen, 472, 82, 'last 30-second batch', 15);
+      label(pen, 472, 101, 'carried over', 15);
+      label(pen, 340, 250, 'after the fix: one notification per cycle', 15);
+    }
+  };
+
+  document.querySelectorAll('svg[data-rough]').forEach(function (d) {
+    var draw = SKETCHES[d.dataset.rough];
+    if (!draw) return;
+    var rc = hasRough ? rough.svg(d) : null;
+    var ink = node('g', {}), pen = node('g', { class: 'pen' });
+    d.appendChild(ink); d.appendChild(pen);
+    draw(rc, ink, pen);
+  });
+
+  var a = document.querySelector('svg[data-rough="arrow"]');
+  if (a && hasRough) {
+    var ra = rough.svg(a);
+    a.appendChild(ra.curve([[124, 6], [92, 18], [58, 38], [18, 52]], opts({ strokeWidth: 1.4, seed: 11 })));
+    a.appendChild(ra.line(18, 52, 31, 43, opts({ strokeWidth: 1.4, seed: 12 })));
+    a.appendChild(ra.line(18, 52, 32, 57, opts({ strokeWidth: 1.4, seed: 13 })));
+  }
+
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
