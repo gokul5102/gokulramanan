@@ -1,0 +1,33 @@
+---
+import HandArrow from '../components/HandArrow.astro';
+import Row from '../components/Row.astro';
+import Page from '../layouts/Page.astro';
+---
+
+<Page
+  title="Gokul Ramanan"
+  description="I build real-time systems for internal sales teams and external clients."
+>
+  <section class="section">
+    <Row>
+      <p class="eyebrow">Software engineer at JPMorgan Chase · Mumbai</p>
+      <h1>I build <mark>real-time systems</mark> for internal sales teams and external clients.</h1>
+      <Fragment slot="note">
+        Mostly backend work, in Java and Spring Boot.
+        <HandArrow />
+      </Fragment>
+    </Row>
+    <Row>
+      <p class="intro">
+        I'm a backend engineer. I work on live data streaming and alerting, with a focus on low latency and high
+        availability: apps that respond fast and keep running when something fails. I use AI coding tools to assist
+        with my daily workflows.
+      </p>
+      <div class="paths">
+        <a href="/resume" class="path"><small>Hiring?</small><span>Here's my résumé →</span></a>
+        <a href="/contact" class="path"><small>Want to talk?</small><span>Say hello →</span></a>
+      </div>
+      <Fragment slot="note">Weekdays: code.<br />Weekends: football.<br />Most evenings: the gym.</Fragment>
+    </Row>
+  </section>
+</Page>

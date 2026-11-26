@@ -1,0 +1,15 @@
+---
+// One row of the Margin notes layout: the reading column, and a Margin note beside it.
+// Below 900px the Margin note drops under the text. A row without a note leaves the margin empty.
+---
+
+<div class="row">
+  <div><slot /></div>
+  {
+    Astro.slots.has('note') && (
+      <aside class="note">
+        <slot name="note" />
+      </aside>
+    )
+  }
+</div>

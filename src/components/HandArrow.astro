@@ -1,0 +1,26 @@
+---
+// The hand-drawn arrow that points from a Margin note to its text.
+// Drawn with roughjs at build time with fixed seeds, so every build draws the same static SVG.
+import rough from 'roughjs';
+
+const generator = rough.generator();
+const options = { stroke: 'currentColor', strokeWidth: 1.4, roughness: 1.3, bowing: 1 };
+const shapes = [
+  generator.curve(
+    [
+      [124, 6],
+      [92, 18],
+      [58, 38],
+      [18, 52],
+    ],
+    { ...options, seed: 11 },
+  ),
+  generator.line(18, 52, 31, 43, { ...options, seed: 12 }),
+  generator.line(18, 52, 32, 57, { ...options, seed: 13 }),
+];
+const paths = shapes.flatMap((shape) => generator.toPaths(shape));
+---
+
+<svg class="hand-arrow" viewBox="0 0 130 64" aria-hidden="true" focusable="false">
+  {paths.map((p) => <path d={p.d} stroke={p.stroke} stroke-width={p.strokeWidth} fill="none" />)}
+</svg>

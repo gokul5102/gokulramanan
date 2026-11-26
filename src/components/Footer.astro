@@ -1,0 +1,24 @@
+---
+import { email, profiles, resumePdf } from '../site.ts';
+
+interface Props {
+  /** False on the contact page, which already says "Say hello." */
+  showHeading?: boolean;
+}
+
+const { showHeading = true } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<footer class="wrap">
+  <div class="foot">
+    {showHeading && <h2>Say hello.</h2>}
+    <span class="email">{email}</span>
+    <div class="foot-links">
+      <a href={profiles.linkedIn} target="_blank" rel="noopener">LinkedIn</a>
+      <a href={profiles.gitHub} target="_blank" rel="noopener">GitHub</a>
+      <a href={resumePdf}>Résumé (PDF)</a>
+    </div>
+    <small>Built with Astro, hosted on Netlify. © {year} Gokul Ramanan.</small>
+  </div>
+</footer>
