@@ -1,0 +1,16 @@
+---
+import Row from '../components/Row.astro';
+import Page from '../layouts/Page.astro';
+---
+
+<Page title="Page not found · Gokul Ramanan" description="This page isn't here.">
+  <section class="section">
+    <Row>
+      <p class="eyebrow">404</p>
+      <h1>This page isn't here.</h1>
+      <p class="intro">It may have moved, or the link has a typo. The homepage is a good place to start.</p>
+      <a href="/" class="next-link">Go to the homepage →</a>
+      <Fragment slot="note">If one of my links sent you here, tell me and I'll fix it.</Fragment>
+    </Row>
+  </section>
+</Page>
