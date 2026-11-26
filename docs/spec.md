@@ -190,7 +190,7 @@ Every Case study page has the same parts, in this order:
 - **Top:** "Internal sales teams and external clients get alerts about BWICs, which are bond auctions. I was the server lead for a new alert service, which I designed and launched from scratch." No Margin note.
 - **The problem:** "Sales teams and clients rely on alerts to follow BWICs, so notification latency matters. An alert is only useful if it arrives quickly. The service needed lower latency, and it needed to evaluate far more alerts concurrently." No Margin note. Throughput is not mentioned, because the résumé gives no figure.
 - **What I built:** "The service is a rule engine. It evaluates each alert separately, over AMPS, a messaging engine, so one complex alert can't slow down the rest." / "Alerts support nested AND/OR filters, so a single alert can combine many conditions." / "Alerts are evaluated in 30-second batch cycles. If several BWICs match an alert within one cycle, the user gets a single notification for all of them, not one per match. That keeps notifications useful instead of noisy." / "The service runs as several instances and uses leader election. If the leader fails, another instance takes over automatically, so the service stays highly available." No Margin note.
-  - Sketch labels: "BWIC data, over AMPS" → "Rule engine (leader): evaluates alerts every 30 seconds" → "eTrading platform screens", with a dashed "Standby instance: takes over if the leader fails". Caption: "A rough sketch of how it fits together."
+  - Sketch labels: "BWIC data, over AMPS" → "Rule engine (leader): evaluates alerts every 30 seconds" → "Email and eTrading screens", with a dashed "Standby instance: takes over if the leader fails". Caption: "A rough sketch of how it fits together."
 - **The result:** "Within each cycle, notifications now go out with ==33% lower latency==. The engine also handles 2,000 concurrent alerts, four times what it could before." The 33% is the time from a cycle running to the notification reaching the user. No CMO sentence.
 - **How I worked:** "As server lead, I architected the service and took it through to launch. I built it with agentic AI-assisted development, using GitHub Copilot agents with custom instructions and skills." Built with: Java · Spring Boot · AMPS · GitHub Copilot. No Margin note.
 
@@ -358,7 +358,8 @@ Logic is kept apart from pages and I/O. Each module is small at the interface an
   - Work happens on branch deploys, which are free.
   - A production deploy happens only for a change Gokul approves, since each one costs 15 of the 300 monthly credits.
   - Pages stay light.
-- **Repo:** a public GitHub repo under `gokul5102`.
+- **Repo:** a public GitHub repo, `gokul5102/gokulramanan`, named after the site address.
+- **Résumé PDF:** the download is Gokul's own PDF, published unchanged (decided 2026-11-26). It is the one place internal team and system names appear; the built-site word checks cover the HTML pages, not the PDF.
 
 ### Launch differences
 
@@ -422,13 +423,11 @@ The freelance pieces ship later, in one separate change. Until then:
 - Rewrite its code properly. Don't copy it.
 
 **Open questions (ask when the ticket starts):**
-1. **Résumé PDF source:** Gokul exports a public version from his own source, or the PDF is generated from the web Résumé with headless Chrome. Ticket 11.
-2. **Content format,** with no new dependencies. Ticket 05.
-3. **Outreach tag format.** The prototype accepts lowercase letters, digits and hyphens, up to 40 characters, and a newer valid tag replaces an older one. Ticket 12.
-4. **Clock without JavaScript.** The footer would read "It's Mumbai (IST) here in Mumbai." The proposal is that the fallback replaces the whole sentence. Ticket 03.
-5. **Sketches at phone width.** The labels shrink to about 8px. The proposal is a narrower layout of each Sketch for phones. Ticket 04.
-6. **Super Saviours link.** It points to Devpost until Gokul says the GitHub repo is ready to link; then it points to the repo. Ticket 09.
-7. **Alerts Sketch and email.** The Sketch shows alerts going to "eTrading platform screens", but alerts also arrive by email. Confirm whether the label should mention email. Ticket 04.
+1. **Content format,** with no new dependencies. Ticket 05.
+2. **Outreach tag format.** The prototype accepts lowercase letters, digits and hyphens, up to 40 characters, and a newer valid tag replaces an older one. Ticket 12.
+3. **Clock without JavaScript.** The footer would read "It's Mumbai (IST) here in Mumbai." The proposal is that the fallback replaces the whole sentence. Ticket 03.
+4. **Sketches at phone width.** The labels shrink to about 8px. The proposal is a narrower layout of each Sketch for phones. Ticket 04.
+5. **Super Saviours link.** It points to Devpost until Gokul says the GitHub repo is ready to link; then it points to the repo. Ticket 09.
 
 **Tickets.** This is a task graph: a ticket is ready when everything in "Blocked by" is done. Each ticket is a file in `.scratch/portfolio-site/issues/` until an issue tracker exists.
 
